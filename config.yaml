@@ -17,17 +17,17 @@ root:
       erase: true
       partitions: # used fdisk conf
         boot: 
-          - size: +512M
-          - filesystem: linux
-          - label: BOOT
+          size: +512M
+          filesystem: linux
+          label: BOOT
         root: 
-          - size: +40G
-          - filesystem: linux
-          - label: ROOT
+          size: +40G
+          filesystem: linux
+          label: ROOT
         home: 
-          - size: " "
-          - filesystem: uefi
-          - label: HOME
+          size: " "
+          filesystem: uefi
+          label: HOME
   packages: # official mirror 
   # Base Packages
     - base
@@ -54,6 +54,6 @@ user:
     - docker
 
 logs:
-  scripts: False 
+  scripts: False
   packages: False
   services: False

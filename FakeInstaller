@@ -205,9 +205,14 @@ class ArchLinux:
         print(f"{colors.OKGREEN}==>{colors.ENDC} Enabling Services")
         for service in self.__config["services"]:
             print(f"    {colors.OKBLUE}-->{colors.ENDC} {service}")
-            self.__chrootExecutor(
-                f"systemctl enable {service}", self.__logs["services"]
-            )
+            if self.__user == "root":
+                self.__chrootExecutor(
+                    f"systemctl enable {service}", self.__logs["services"]
+                )
+            else:
+                self.__executor(
+                    f"sudo systemctl enable {service}", self.__logs["services"]
+                )
 
     def __setRootPassword(self):
         password = self.__config["account"]["root-password"]
