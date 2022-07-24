@@ -1,0 +1,59 @@
+root:
+  account:
+    root-password: password
+    username: fakesudo
+    password: password
+  settings:
+    ntp: True
+    hostname: archlinux
+    locale: 
+      - en_US.UTF-8 UTF-8
+      - fa_IR UTF-8
+    lang: en_US.UTF-8
+    timezone: Asia/Tehran
+    shell: /usr/bin/fish
+    drive:
+      blk: /dev/sda
+      erase: true
+      partitions: # used fdisk conf
+        boot: 
+          - size: +512M
+          - filesystem: linux
+          - label: BOOT
+        root: 
+          - size: +40G
+          - filesystem: linux
+          - label: ROOT
+        home: 
+          - size: " "
+          - filesystem: uefi
+          - label: HOME
+  packages: # official mirror 
+  # Base Packages
+    - base
+    - base-devel
+    - linux
+    - linux-firmware
+    - linux-headers
+    - grub
+    - efibootmgr
+    - intel-ucode
+    - fish
+  services:
+    - NetworkManager
+
+user:
+  scripts:
+    - name: Simple Script
+      value: ./configs/simple.sh
+  aurhelper: paru # or yay
+  packages: # official & aur
+    - windscribe-cli
+    - docker
+  services:
+    - docker
+
+logs:
+  scripts: False 
+  packages: False
+  services: False
