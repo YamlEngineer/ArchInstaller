@@ -72,12 +72,20 @@ class ArchLinux:
             print(
                 f"        {colors.OKBLUE}-->{colors.ENDC} Partition : {partition['label']}"
             )
-            self.__executor(
-                f"echo '"
-                + f'n\n{partition["number"]}\n\n{partition["size"]}\nt\n{partition["filesystem"]}\nw\n"'
-                + f" | fdisk {drive['blk']}",
-                False,
-            )
+            if partition['number'] == 1:
+                self.__executor(
+                    f"echo '"
+                    + f'n\n{partition["number"]}\n\n{partition["size"]}\nt\n{partition["filesystem"]}\nw\n"'
+                    + f" | fdisk {drive['blk']}",
+                    False,
+                )
+            else:
+                self.__executor(
+                    f"echo '"
+                    + f'n\n{partition["number"]}\n\n{partition["size"]}\nt\n{partition["number"]}\n{partition["filesystem"]}\nw\n"'
+                    + f" | fdisk {drive['blk']}",
+                    False,
+                )
 
             # Make FileSystem & add Label to Partition
             print(
