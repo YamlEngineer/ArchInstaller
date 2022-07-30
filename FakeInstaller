@@ -55,7 +55,7 @@ class ArchLinux:
         )
 
     def __driveConfigurator(self) -> None:
-        print("{colors.OKGREEN}==>{colors.ENDC} Config Hard Drive")  # with fdisk
+        print(f"{colors.OKGREEN}==>{colors.ENDC} Config Hard Drive")  # with fdisk
 
         drive = self.__config["settings"]["drive"]
 
@@ -116,8 +116,8 @@ class ArchLinux:
 
         # Mount Partitions
         # root -> /mnt
-        print("{colors.OKGREEN}==>{colors.ENDC} Mount Partitions ")
-        print("    {colors.OKBLUE}-->{colors.ENDC} ROOT")
+        print(f"{colors.OKGREEN}==>{colors.ENDC} Mount Partitions ")
+        print(f"    {colors.OKBLUE}-->{colors.ENDC} ROOT")
         self.__executor(
             f"mount /dev/disk/by-label/{drive['partitions']['root']['label']} /mnt",
             False,
