@@ -113,10 +113,10 @@ class ArchLinux:
     def __mount(self):
         
         drive = self.__config["settings"]["drive"]
-        os.system("ls /dev/disk/by-label/ && sleep 5 && ls /dev/disk/by-label/")
         # Mount Partitions
         # root -> /mnt
         print(f"{colors.OKGREEN}==>{colors.ENDC} Mount Partitions ")
+        self.__executor("sleep 3",False)
         print(f"    {colors.OKBLUE}-->{colors.ENDC} ROOT")
         self.__executor(
             f"mount /dev/disk/by-label/ROOT /mnt",
