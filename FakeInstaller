@@ -102,7 +102,7 @@ class ArchLinux:
                     )
                 case "linux":
                     self.__executor(
-                        f"mkfs.ext4 -f -L {label} {drive['blk']}{number}",
+                        f"echo 'y\n' | mkfs.ext4 -L {label} {drive['blk']}{number}",
                         False,
                     )
                 case "swap":
