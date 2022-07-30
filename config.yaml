@@ -18,17 +18,17 @@ root:
       partitions: # used fdisk conf
         - label: BOOT
           size: +512M
-          filesystem: linux
+          filesystem: uefi
           number: 1
         
         - label: ROOT 
-          size: +40G
+          size: +5G
           filesystem: linux
           number: 2
         
         - label: HOME
           size: " "
-          filesystem: uefi
+          filesystem: linux
           number: 3
 
   packages: # official mirror 
