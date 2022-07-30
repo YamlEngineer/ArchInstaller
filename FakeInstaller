@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from os.path import isfile
 import yaml, sys, os, requests
 
 
@@ -114,24 +115,26 @@ class ArchLinux:
         
         drive = self.__config["settings"]["drive"]
         # Mount Partitions
-        # root -> /mnt
         print(f"{colors.OKGREEN}==>{colors.ENDC} Mount Partitions ")
-        self.__executor("sleep 6",False)
+
+        # root -> /mnt
         print(f"    {colors.OKBLUE}-->{colors.ENDC} ROOT")
+        while os.path.exists('/dev/disk/by-label/ROOT'):
+            self.__executor("sleep 1",False)
         self.__executor(
             f"mount /dev/disk/by-label/ROOT /mnt",
             False,
         )
         self.__executor("mkdir -p /mnt/{home,boot/efi}", False)
 
-        # boot -> /mnt/boot/efi
-        print(f"    {colors.OKBLUE}-->{colors.ENDC} BOOT")
-        self.__executor(
-            f"mount /dev/disk/by-label/BOOT /mnt/boot/efi",
-            False,
-        )
-
-        for partition in drive['partitions']: 
+        for partition in drive['partitions']:
+            if partition['label'] == "BOOT":
+                # boot -> /mnt/boot/efi
+                print(f"    {colors.OKBLUE}-->{colors.ENDC} BOOT")
+                self.__executor(
+                    f"mount {drive['blk']}{partition['number']} /mnt/boot/efi",
+                    False,
+                )
             if partition['label'] == "HOME":
                 # Mount Home Partition if exist
                 # home -> /mnt/home
@@ -146,6 +149,7 @@ class ArchLinux:
                 self.__executor(
                     f"swapon {drive['blk']}{partition['number']}", False
                 )
+
 
     def __installPackages(self) -> None:
         print("{colors.OKGREEN}==>{colors.ENDC} Install Packages")
