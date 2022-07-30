@@ -152,7 +152,7 @@ class ArchLinux:
 
 
     def __installPackages(self) -> None:
-        print("{colors.OKGREEN}==>{colors.ENDC} Install Packages")
+        print(f"{colors.OKGREEN}==>{colors.ENDC} Install Packages")
         if self.__user == "root":
             for package in self.__config["packages"]:
                 print(f"    {colors.OKBLUE}-->{colors.ENDC} Package : {package}")
@@ -167,11 +167,11 @@ class ArchLinux:
 
 
     def __genFstab(self) -> None:
-        print("{colors.OKGREEN}==>{colors.ENDC} Generating FSTAB")
+        print(f"{colors.OKGREEN}==>{colors.ENDC} Generating FSTAB")
         self.__executor("genfstab -U /mnt >> /mnt/etc/fstab", False)
 
     def __setLocale(self) -> None:
-        print("{colors.OKGREEN}==>{colors.ENDC} Setting Locale")
+        print(f"{colors.OKGREEN}==>{colors.ENDC} Setting Locale")
         with open("/mnt/etc/locale.gen") as f:
             for locale in self.__config["settings"]["locale"]:
                 print(f"    {colors.OKBLUE}-->{colors.ENDC} Generating {locale}")
@@ -194,7 +194,7 @@ class ArchLinux:
         self.__chrootExecutor("hwclock --systohc --utc", False)
 
     def __installBootLoader(self):
-        print("{colors.OKGREEN}==>{colors.ENDC} Generating BootLoader")
+        print(f"{colors.OKGREEN}==>{colors.ENDC} Generating BootLoader")
         self.__chrootExecutor(
             f"grub-install --recheck {self.__config['settings']['drive']['blk']}", False
         )
@@ -229,14 +229,14 @@ class ArchLinux:
 
     def __setRootPassword(self):
         password = self.__config["account"]["root-password"]
-        print("{colors.OKGREEN}==>{colors.ENDC} Set Root Password")
+        print(f"{colors.OKGREEN}==>{colors.ENDC} Set Root Password")
         self.__chrootExecutor(f"echo -e '{password}\n{password}' | passwd", False)
 
     def __createUser(self):
         username = self.__config["account"]["username"]
         password = self.__config["account"]["password"]
         shell = self.__config["settings"]["shell"]
-        print("{colors.OKGREEN}==>{colors.ENDC} Creating User ({username})")
+        print(f"{colors.OKGREEN}==>{colors.ENDC} Creating User ({username})")
         self.__chrootExecutor(
             f"useradd -m -g users -G wheel -s {shell} {username}; echo -e '{password}\n{password}' | passwd {username}",
             False,
@@ -261,7 +261,7 @@ class ArchLinux:
             )
 
     def __umount(self):
-        print("{colors.OKGREEN}==>{colors.ENDC} Umount Partitions")
+        print(f"{colors.OKGREEN}==>{colors.ENDC} Umount Partitions")
         self.__executor("umount -R /mnt", False)
 
     def __reboot(self):
