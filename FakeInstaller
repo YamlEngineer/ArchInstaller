@@ -122,7 +122,7 @@ class ArchLinux:
             f"mount /dev/disk/by-label/ROOT /mnt",
             False,
         )
-        self.__executor("mkdir /mnt/{home,boot/efi}", False)
+        self.__executor("mkdir -p /mnt/{home,boot/efi}", False)
 
         # boot -> /mnt/boot/efi
         print(f"    {colors.OKBLUE}-->{colors.ENDC} BOOT")
@@ -132,7 +132,7 @@ class ArchLinux:
         )
 
         for partition in drive['partitions']: 
-            if "HOME" in partition['label']:
+            if partition['label'] == "HOME":
                 # Mount Home Partition if exist
                 # home -> /mnt/home
                 print(f"    {colors.OKBLUE}-->{colors.ENDC} HOME")
@@ -140,7 +140,7 @@ class ArchLinux:
                     f"mount /dev/disk/by-label/HOME /mnt/home",
                     False,
                 )
-            if "SWAP" in partition['label']:
+            if partition['label'] == "SWAP":
                 # enable swap if exists
                 print(f"    {colors.OKBLUE}-->{colors.ENDC} Enable SWAP Partition ")
                 self.__executor(
