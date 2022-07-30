@@ -69,45 +69,45 @@ class ArchLinux:
         # Making Partitions
         print(f"    {colors.OKBLUE}-->{colors.ENDC} Create Partitions")
         for partition in drive["partitions"]:
+            size = partition['size']
+            number = partition['number']
+            label = partition['label']
+            filesystem = partition['filesystem']
             print(
                 f"        {colors.OKBLUE}-->{colors.ENDC} Partition : {partition['label']}"
             )
             if partition['number'] == 1:
                 self.__executor(
-                    f"echo '"
-                    + f'n\n{partition["number"]}\n\n{partition["size"]}\nt\n{partition["filesystem"]}\nw\n"'
-                    + f" | fdisk {drive['blk']}",
+                    f"echo 'n\n{number}\n\n{size}\nt\n{filesystem}\nw\n | fdisk {drive['blk']}",
                     False,
                 )
             else:
                 self.__executor(
-                    f"echo '"
-                    + f'n\n{partition["number"]}\n\n{partition["size"]}\nt\n{partition["number"]}\n{partition["filesystem"]}\nw\n"'
-                    + f" | fdisk {drive['blk']}",
+                    f"echo 'n\n{number}\n\n{size}\nt\n{number}\n{filesystem}\nw\n | fdisk {drive['blk']}",
                     False,
                 )
 
             # Make FileSystem & add Label to Partition
             print(
-                f"            {colors.OKBLUE}-->{colors.ENDC} Make filesystem : {partition['filesystem']}"
+                f"            {colors.OKBLUE}-->{colors.ENDC} Make filesystem : {filesystem}"
             )
-            match partition["filesystem"]:
+            match filesystem:
                 case "uefi":
                     self.__executor(
-                        f"mkfs.fat -F32 {drive['blk']}{partition['number']}", False
+                        f"mkfs.fat -F32 {drive['blk']}{number}", False
                     )
                     self.__executor(
-                        f"fatlabel {drive['blk']}{partition['number']} {partition['label']}",
+                        f"fatlabel {drive['blk']}{number} {label}",
                         False,
                     )
                 case "linux":
                     self.__executor(
-                        f"mkfs.ext4 -f -L {partition['label']} {drive['blk']}{partition['number']}",
+                        f"mkfs.ext4 -f -L {label} {drive['blk']}{number}",
                         False,
                     )
                 case "swap":
                     self.__executor(
-                        f"mkswap {drive['blk']}{partition['number']}", False
+                        f"mkswap {drive['blk']}{number}", False
                     )
 
     def __mount(self):
