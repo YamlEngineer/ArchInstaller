@@ -119,33 +119,33 @@ class ArchLinux:
         print(f"{colors.OKGREEN}==>{colors.ENDC} Mount Partitions ")
         print(f"    {colors.OKBLUE}-->{colors.ENDC} ROOT")
         self.__executor(
-            f"mount /dev/disk/by-label/{drive['partitions']['root']['label']} /mnt",
+            f"mount /dev/disk/by-label/ROOT /mnt",
             False,
         )
         self.__executor("mkdir /mnt/{home,boot/efi}", False)
 
         # boot -> /mnt/boot/efi
-        print("    {colors.OKBLUE}-->{colors.ENDC} BOOT")
+        print(f"    {colors.OKBLUE}-->{colors.ENDC} BOOT")
         self.__executor(
-            f"mount /dev/disk/by-label/{drive['partitions']['boot']['label']} /mnt",
+            f"mount /dev/disk/by-label/BOOT /mnt",
             False,
         )
 
-        # Mount Home Partition if exist
-        # home -> /mnt/home
-        if "home" in drive["partitions"]:
-            print("    {colors.OKBLUE}-->{colors.ENDC} HOME")
-            self.__executor(
-                f"mount /dev/disk/by-label/{drive['partitions']['home']['label']} /mnt",
-                False,
-            )
-
-        # enable swap if exists
-        if "swap" in drive["partitions"]:
-            print("    {colors.OKBLUE}-->{colors.ENDC} Enable SWAP Partition ")
-            self.__executor(
-                f"swapon {drive['blk']}{drive['partitions']['swap']['number']}", False
-            )
+        for partition in drive['partitions']: 
+            if "HOME" in partition['label']:
+                # Mount Home Partition if exist
+                # home -> /mnt/home
+                print(f"    {colors.OKBLUE}-->{colors.ENDC} HOME")
+                self.__executor(
+                    f"mount /dev/disk/by-label/HOME /mnt",
+                    False,
+                )
+            if "SWAP" in partition['label']:
+                # enable swap if exists
+                print(f"    {colors.OKBLUE}-->{colors.ENDC} Enable SWAP Partition ")
+                self.__executor(
+                    f"swapon {drive['blk']}{partition['number']}", False
+                )
 
     def __installPackages(self) -> None:
         print("{colors.OKGREEN}==>{colors.ENDC} Install Packages")
