@@ -100,18 +100,15 @@ class ArchLinux:
                         f"fatlabel {drive['blk']}{number} {label}",
                         False,
                     )
-                    self.__executor("sleep 2",False)
                 case "linux":
                     self.__executor(
                         f"echo 'y\n' | mkfs.ext4 -L {label} {drive['blk']}{number}",
                         False,
                     )
-                    self.__executor("sleep 2",False)
                 case "swap":
                     self.__executor(
                         f"mkswap {drive['blk']}{number}", False
                     )
-                    self.__executor("sleep 2",False)
 
     def __mount(self):
         
@@ -119,7 +116,7 @@ class ArchLinux:
         # Mount Partitions
         # root -> /mnt
         print(f"{colors.OKGREEN}==>{colors.ENDC} Mount Partitions ")
-        self.__executor("sleep 1",False)
+        self.__executor("sleep 6",False)
         print(f"    {colors.OKBLUE}-->{colors.ENDC} ROOT")
         self.__executor(
             f"mount /dev/disk/by-label/ROOT /mnt",
