@@ -149,9 +149,18 @@ class ArchLinux:
 
     def __installPackages(self) -> None:
         print("{colors.OKGREEN}==>{colors.ENDC} Install Packages")
-        for package in self.__config["packages"]:
-            print(f"    {colors.OKBLUE}-->{colors.ENDC} Package : {package}")
-            self.__executor(f"pacstrap /mnt {package}", self.__logs["packages"])
+        if self.__user == "root":
+            for package in self.__config["packages"]:
+                print(f"    {colors.OKBLUE}-->{colors.ENDC} Package : {package}")
+                self.__executor(f"pacstrap /mnt {package}", self.__logs["packages"])
+        else:
+            for package in self.__config["packages"]:
+                print(f"    {colors.OKBLUE}-->{colors.ENDC} {package}")
+                self.__executor(
+                    f"{self.__config['aurhelper']} -S --skipreview --noconfirm {package}",
+                    self.__logs["packages"],
+                )
+
 
     def __genFstab(self) -> None:
         print("{colors.OKGREEN}==>{colors.ENDC} Generating FSTAB")
@@ -267,15 +276,6 @@ class ArchLinux:
             self.__logs["packages"],
         )
 
-    def __installUserPackages(self):
-        print(f"{colors.OKGREEN}==>{colors.ENDC} Install Packages")
-        for package in self.__config["packages"]:
-            print(f"    {colors.OKBLUE}-->{colors.ENDC} {package}")
-            self.__executor(
-                f"{self.__config['aurhelper']} -S --skipreview --noconfirm {package}",
-                self.__logs["packages"],
-            )
-
     def __runUserScripts(self):
         print(f"{colors.OKGREEN}==>{colors.ENDC} Execute Your Scripts")
         for script in self.__config["scripts"]:
@@ -305,7 +305,7 @@ class ArchLinux:
         else:
             self.__sudoersConf("UN")
             self.__installAURHelper()
-            self.__installUserPackages()
+            self.__installPackages()
             self.__runUserScripts()
             self.__enableServices()
             self.__sudoersConf("CN")
