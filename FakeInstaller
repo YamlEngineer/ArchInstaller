@@ -137,7 +137,7 @@ class ArchLinux:
                 # home -> /mnt/home
                 print(f"    {colors.OKBLUE}-->{colors.ENDC} HOME")
                 self.__executor(
-                    f"mount /dev/disk/by-label/HOME /mnt/home",
+                    f"mount {drive['blk']}{partition['number']} /mnt/home",
                     False,
                 )
             if partition['label'] == "SWAP":
