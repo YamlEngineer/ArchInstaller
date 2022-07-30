@@ -78,12 +78,12 @@ class ArchLinux:
             )
             if partition['number'] == 1:
                 self.__executor(
-                    f"echo 'n\n{number}\n\n{size}\nt\n{filesystem}\nw\n | fdisk {drive['blk']}",
+                    f"echo 'n\n{number}\n\n{size}\nt\n{filesystem}\nw\n' | fdisk {drive['blk']}",
                     False,
                 )
             else:
                 self.__executor(
-                    f"echo 'n\n{number}\n\n{size}\nt\n{number}\n{filesystem}\nw\n | fdisk {drive['blk']}",
+                    f"echo 'n\n{number}\n\n{size}\nt\n{number}\n{filesystem}\nw\n' | fdisk {drive['blk']}",
                     False,
                 )
 
