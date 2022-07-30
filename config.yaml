@@ -16,18 +16,21 @@ root:
       blk: /dev/sda
       erase: true
       partitions: # used fdisk conf
-        boot: 
+        - label: BOOT
           size: +512M
           filesystem: linux
-          label: BOOT
-        root: 
+          number: 1
+        
+        - label: ROOT 
           size: +40G
           filesystem: linux
-          label: ROOT
-        home: 
+          number: 2
+        
+        - label: HOME
           size: " "
           filesystem: uefi
-          label: HOME
+          number: 3
+
   packages: # official mirror 
   # Base Packages
     - base
