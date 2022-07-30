@@ -119,7 +119,7 @@ class ArchLinux:
 
         # root -> /mnt
         print(f"    {colors.OKBLUE}-->{colors.ENDC} ROOT")
-        while os.path.exists('/dev/disk/by-label/ROOT'):
+        while not os.path.exists('/dev/disk/by-label/ROOT'):
             self.__executor("sleep 1",False)
         self.__executor(
             f"mount /dev/disk/by-label/ROOT /mnt",
