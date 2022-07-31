@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from os.path import isfile
 import yaml, sys, os, requests
 
 
@@ -66,7 +65,7 @@ class ArchLinux:
                 f"    {colors.OKBLUE}-->{colors.ENDC} Formatting Drive : {drive['blk']}"
             )
             self.__executor(f"echo 'g\nw\n' | fdisk {drive['blk']}", False)
-
+            
         # Making Partitions
         print(f"    {colors.OKBLUE}-->{colors.ENDC} Create Partitions")
         for partition in drive["partitions"]:
@@ -172,7 +171,7 @@ class ArchLinux:
 
     def __setLocale(self) -> None:
         print(f"{colors.OKGREEN}==>{colors.ENDC} Setting Locale")
-        with open("/mnt/etc/locale.gen") as f:
+        with open("/mnt/etc/locale.gen", "a") as f:
             for locale in self.__config["settings"]["locale"]:
                 print(f"    {colors.OKBLUE}-->{colors.ENDC} Generating {locale}")
                 f.write(locale)
@@ -209,7 +208,7 @@ class ArchLinux:
 
     def __setHosts(self) -> None:
         print(f"{colors.OKGREEN}==>{colors.ENDC} set hosts")
-        with open("/mnt/etc/hosts", "w") as f:
+        with open("/mnt/etc/hosts", "a") as f:
             f.write(
                 f"127.0.0.1     localhost.localdomain        localhost\n::1           localhost.localdomain        localhost\n127.0.1.1    {self.__config['settings']['hostname']}.localdomain    {self.__config['settings']['hostname']}"
             )
@@ -230,7 +229,7 @@ class ArchLinux:
     def __setRootPassword(self):
         password = self.__config["account"]["root-password"]
         print(f"{colors.OKGREEN}==>{colors.ENDC} Set Root Password")
-        self.__chrootExecutor(f"echo -e '{password}\n{password}' | passwd", False)
+        self.__chrootExecutor(f"echo -e '{password}\n{password}\n' | passwd", False)
 
     def __createUser(self):
         username = self.__config["account"]["username"]
@@ -238,7 +237,7 @@ class ArchLinux:
         shell = self.__config["settings"]["shell"]
         print(f"{colors.OKGREEN}==>{colors.ENDC} Creating User ({username})")
         self.__chrootExecutor(
-            f"useradd -m -g users -G wheel -s {shell} {username}; echo -e '{password}\n{password}' | passwd {username}",
+            f"useradd -m -g users -G wheel -s {shell} {username}; echo -e '{password}\n{password}\n' | passwd {username}",
             False,
         )
 
@@ -260,6 +259,9 @@ class ArchLinux:
                 r"sudo sed -i 's/^\s*\(%wheel\s*ALL=(ALL:ALL)\s*NOPASSWD:\s*ALL\)/# \1/' /etc/sudoers",
                 True,
             )
+    
+    def __copyInstaller(self):
+        self.__executor(f"cp -r . /mnt/home/{self.__config['account']['username']}",False)
 
     def __umount(self):
         print(f"{colors.OKGREEN}==>{colors.ENDC} Umount Partitions")
@@ -305,6 +307,7 @@ class ArchLinux:
             self.__setRootPassword()
             self.__createUser()
             self.__sudoersConf("UA")
+            self.__copyInstaller()
             self.__umount()
             self.__reboot()
         else:
