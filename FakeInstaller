@@ -229,11 +229,8 @@ class ArchLinux:
         shell = self.__config["settings"]["shell"]
         print(f"{colors.OKGREEN}==>{colors.ENDC} Creating User ({username})")
         self.__chrootExecutor(
-            f"useradd -m -g users -G wheel -s {shell} {username}",
+            f"useradd -m -g users -G wheel -s {shell} -p {password} {username}",
             False,
-        )
-        self.__chrootExecutor(
-            f"echo -e '{password}\n{password}\n' | passwd {username}", False
         )
 
     def __sudoersConf(self, conf):

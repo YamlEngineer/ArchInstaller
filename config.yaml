@@ -1,6 +1,6 @@
 root:
   account:
-    root-password: password
+    rootpassword: password
     username: fakesudo
     password: password
   settings:
