@@ -34,10 +34,10 @@ class ArchLinux:
 
     def __chrootExecutor(self, command: str, logs: bool) -> None:
         if logs:
-            os.system(f"chroot /mnt /bin/bash -c {command} && exit")
+            os.system(f"chroot /mnt {command} && exit")
         else:
             os.system(
-                f"chroot /mnt /bin/bash -c {command} >/dev/null 2>&1 && exit >/dev/null 2>&1"
+                f"chroot /mnt {command} >/dev/null 2>&1 && exit >/dev/null 2>&1"
             )
 
     def __executor(self, command: str, logs: bool) -> None:
