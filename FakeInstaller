@@ -74,7 +74,7 @@ class ArchLinux:
             label = partition["label"]
             filesystem = partition["filesystem"]
             print(
-                f"        {colors.OKBLUE}-->{colors.ENDC} Partition : {partition['label']}"
+                f"        {colors.OKCYAN}-->{colors.ENDC} Partition : {partition['label']}"
             )
             if partition["number"] == 1:
                 self.__executor(
