@@ -172,7 +172,7 @@ class ArchLinux:
             f"    {colors.OKBLUE}-->{colors.ENDC} set LANG env to {self.__config['settings']['lang']}"
         )
         with open("/mnt/etc/locale.conf", "w") as f:
-            f.write(f"LANG={self.__config['settings']['lang']}")
+            f.write(f"LANG={self.__config['settings']['lang']}\n")
 
     def __setTimeZone(self) -> None:
         print(
