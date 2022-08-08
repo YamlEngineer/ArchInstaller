@@ -254,7 +254,13 @@ class ArchLinux:
 
     def __copyInstaller(self):
         self.__executor(
-            f"cp -r . /mnt/home/{self.__config['account']['username']}", False
+            f"mkdir /mnt/home/{self.__config['account']['username']}/archinstaller", False
+        )
+        self.__executor(
+            f"cp -r . /mnt/home/{self.__config['account']['username']}/archinstaller", False
+        )
+        self.__chrootExecutor(
+                f"chown -R {self.__config['account']['username']}:wheel /mnt/home/{self.__config['account']['username']}/archinstaller", False
         )
 
     def __umount(self):
