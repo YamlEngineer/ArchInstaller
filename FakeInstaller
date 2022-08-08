@@ -260,7 +260,7 @@ class ArchLinux:
             f"cp -r . /mnt/home/{self.__config['account']['username']}/archinstaller", False
         )
         self.__chrootExecutor(
-                f"chown -R {self.__config['account']['username']}:wheel /mnt/home/{self.__config['account']['username']}/archinstaller", False
+            f"chown -R {self.__config['account']['username']}:wheel /mnt/home/{self.__config['account']['username']}/archinstaller", False
         )
 
     def __umount(self):
