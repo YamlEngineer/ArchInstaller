@@ -147,7 +147,7 @@ class ArchLinux:
         print(f"{colors.OKGREEN}==>{colors.ENDC} Install Packages")
         if self.__user == "root":
             for package in self.__config["packages"]:
-                print(f"    {colors.OKBLUE}-->{colors.ENDC} Package : {package}")
+                print(f"    {colors.OKBLUE}-->{colors.ENDC} {package}")
                 self.__executor(f"pacstrap /mnt {package}", self.__logs["packages"])
         else:
             for package in self.__config["packages"]:
@@ -240,7 +240,7 @@ class ArchLinux:
                 r"sed -i 's/^#\s*\(%wheel\s*ALL=(ALL:ALL)\s*ALL\)/\1/' /etc/sudoers",
                 False,
             )
-            print("{colors.OKGREEN}==>{colors.ENDC} Config sudoers file")
+            print(f"{colors.OKGREEN}==>{colors.ENDC} Config sudoers file")
         elif conf == "UN":
             self.__executor(
                 r"sudo sed -i 's/^#\s*\(%wheel\s*ALL=(ALL:ALL)\s*NOPASSWD:\s*ALL\)/\1/' /etc/sudoers",
