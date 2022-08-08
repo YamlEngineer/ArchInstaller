@@ -219,7 +219,7 @@ class ArchLinux:
                 )
 
     def __setRootPassword(self):
-        password = self.__config["account"]["root-password"]
+        password = self.__config["account"]["rootpassword"]
         print(f"{colors.OKGREEN}==>{colors.ENDC} Set Root Password")
         self.__chrootExecutor(f"echo -e '{password}\n{password}\n' | passwd", False)
 
@@ -229,8 +229,11 @@ class ArchLinux:
         shell = self.__config["settings"]["shell"]
         print(f"{colors.OKGREEN}==>{colors.ENDC} Creating User ({username})")
         self.__chrootExecutor(
-            f"useradd -m -g users -G wheel -s {shell} {username}; echo -e '{password}\n{password}\n' | passwd {username}",
+            f"useradd -m -g users -G wheel -s {shell} {username}",
             False,
+        )
+        self.__chrootExecutor(
+            f"echo -e '{password}\n{password}\n' | passwd {username}", False
         )
 
     def __sudoersConf(self, conf):
@@ -254,13 +257,16 @@ class ArchLinux:
 
     def __copyInstaller(self):
         self.__executor(
-            f"mkdir /mnt/home/{self.__config['account']['username']}/archinstaller", False
+            f"mkdir -p /mnt/home/{self.__config['account']['username']}/archinstaller",
+            False,
         )
         self.__executor(
-            f"cp -r . /mnt/home/{self.__config['account']['username']}/archinstaller", False
+            f"cp -r . /mnt/home/{self.__config['account']['username']}/archinstaller",
+            False,
         )
         self.__chrootExecutor(
-            f"chown -R {self.__config['account']['username']}:wheel /mnt/home/{self.__config['account']['username']}/archinstaller", False
+            f"chown -R {self.__config['account']['username']}:wheel /mnt/home/{self.__config['account']['username']}/archinstaller",
+            False,
         )
 
     def __umount(self):
