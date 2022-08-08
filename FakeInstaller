@@ -236,8 +236,8 @@ class ArchLinux:
     def __sudoersConf(self, conf):
         if conf == "UA":
             self.__chrootExecutor("chmod 644 /etc/sudoers", False)
-            self.__chrootExecutor(
-                r"sed -i 's/^#\s*\(%wheel\s*ALL=(ALL:ALL)\s*ALL\)/\1/' /etc/sudoers",
+            self.__executor(
+                r"sed -i 's/^#\s*\(%wheel\s*ALL=(ALL:ALL)\s*ALL\)/\1/' /mnt/etc/sudoers",
                 False,
             )
             print(f"{colors.OKGREEN}==>{colors.ENDC} Config sudoers file")
