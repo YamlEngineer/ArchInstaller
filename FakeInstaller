@@ -165,7 +165,7 @@ class ArchLinux:
 
     def __genFstab(self) -> None:
         print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Generating FSTAB")
-        with open('/mnt/etc/fstab', 'a') as fstab:
+        with open('/mnt/etc/fstab', 'w') as fstab:
             subprocess.run(['genfstab', '-U', '/mnt'], stdout=fstab)
 
     def __setLocale(self) -> None:
