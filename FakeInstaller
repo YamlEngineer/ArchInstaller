@@ -159,7 +159,7 @@ class ArchLinux:
 
     def __genFstab(self) -> None:
         print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Generating FSTAB")
-        self.__executor("genfstab -U /mnt >> /mnt/etc/fstab", False)
+        self.__executor("/usr/bin/genfstab -pU /mnt >> /mnt/etc/fstab", False)
 
     def __setLocale(self) -> None:
         print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Setting Locale")
