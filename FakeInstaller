@@ -126,10 +126,16 @@ class ArchLinux:
             if partition["label"] == "BOOT":
                 # boot -> /mnt/boot/efi
                 print(f"    {colors.OKBLUE}-->{colors.ENDC} BOOT")
-                self.__executor(
-                    f"mount {drive['blk']}{partition['number']} /mnt/boot/efi",
-                    False,
-                )
+                if partition['filesystem'] == 'uefi':
+                    self.__executor(
+                        f"mount {drive['blk']}{partition['number']} /mnt/boot/efi",
+                        False,
+                    )
+                else:
+                    self.__executor(
+                        f"mount {drive['blk']}{partition['number']} /mnt/boot",
+                        False,
+                    )
             if partition["label"] == "HOME":
                 # Mount Home Partition if exist
                 # home -> /mnt/home
@@ -187,9 +193,16 @@ class ArchLinux:
 
     def __installBootLoader(self):
         print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Generating BootLoader")
-        self.__chrootExecutor(
-            f"grub-install --recheck {self.__config['settings']['drive']['blk']}", False
-        )
+        bootloader = self.__config['settings']['bootloader']
+        if 'efidir' in bootloader:
+            self.__chrootExecutor(
+                f"grub-install --target={bootloader['target']} --boot-directory=/boot --efi-directory=/boot/efi --bootloader-id={bootloader['id']} --recheck", False
+            )
+        else:
+            self.__chrootExecutor(
+                f"grub-install --target={bootloader['target']} --boot-directory=/boot --bootloader-id={bootloader['id']} --recheck", False
+            )
+
         self.__chrootExecutor(f"grub-mkconfig -o /boot/grub/grub.cfg", False)
 
     def __setHostName(self) -> None:

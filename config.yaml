@@ -30,6 +30,9 @@ root:
           size: " "
           filesystem: linux
           number: 3
+    bootloader:
+      id: grub
+      target: x86_64-efi
 
   packages: # official mirror 
   # Base Packages
