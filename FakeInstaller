@@ -48,33 +48,33 @@ class ArchLinux:
 
     def __setNtp(self) -> None:
         print(
-            f"{colors.OKGREEN}==>{colors.ENDC} set ntp to {self.__config['settings']['ntp']}"
+            f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} set ntp to {self.__config['settings']['ntp']}"
         )
         self.__executor(
             f"timedatectl set-ntp {self.__config['settings']['ntp']}", False
         )
 
     def __driveConfigurator(self) -> None:
-        print(f"{colors.OKGREEN}==>{colors.ENDC} Config Hard Drive")  # with fdisk
+        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Config Hard Drive")  # with fdisk
 
         drive = self.__config["settings"]["drive"]
 
         # Format Hard Drive
         if drive["erase"]:
             print(
-                f"    {colors.OKBLUE}-->{colors.ENDC} Formatting Drive : {drive['blk']}"
+                f"    {colors.BOLD}{colors.OKBLUE}-->{colors.ENDC} Formatting Drive : {drive['blk']}"
             )
             self.__executor(f"echo 'g\nw\n' | fdisk {drive['blk']}", False)
 
         # Making Partitions
-        print(f"    {colors.OKBLUE}-->{colors.ENDC} Create Partitions")
+        print(f"    {colors.BOLD}{colors.OKBLUE}-->{colors.ENDC} Create Partitions")
         for partition in drive["partitions"]:
             size = partition["size"]
             number = partition["number"]
             label = partition["label"]
             filesystem = partition["filesystem"]
             print(
-                f"        {colors.OKCYAN}-->{colors.ENDC} Partition : {partition['label']}"
+                f"        {colors.BOLD}{colors.OKBLUE}-->{colors.ENDC} Partition : {partition['label']}"
             )
             if partition["number"] == 1:
                 self.__executor(
@@ -89,7 +89,7 @@ class ArchLinux:
 
             # Make FileSystem & add Label to Partition
             print(
-                f"            {colors.OKBLUE}-->{colors.ENDC} Make filesystem : {filesystem}"
+                f"            {colors.BOLD}{colors.OKCYAN}-->{colors.ENDC} Make filesystem : {filesystem}"
             )
             match filesystem:
                 case "uefi":
@@ -110,10 +110,10 @@ class ArchLinux:
 
         drive = self.__config["settings"]["drive"]
         # Mount Partitions
-        print(f"{colors.OKGREEN}==>{colors.ENDC} Mount Partitions ")
+        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Mount Partitions ")
 
         # root -> /mnt
-        print(f"    {colors.OKBLUE}-->{colors.ENDC} ROOT")
+        print(f"    {colors.BOLD}{colors.OKBLUE}-->{colors.ENDC} ROOT")
         while not os.path.exists("/dev/disk/by-label/ROOT"):
             self.__executor("sleep 1", False)
         self.__executor(
@@ -133,7 +133,7 @@ class ArchLinux:
             if partition["label"] == "HOME":
                 # Mount Home Partition if exist
                 # home -> /mnt/home
-                print(f"    {colors.OKBLUE}-->{colors.ENDC} HOME")
+                print(f"    {colors.BOLD}{colors.OKBLUE}-->{colors.ENDC} HOME")
                 self.__executor(
                     f"mount {drive['blk']}{partition['number']} /mnt/home",
                     False,
@@ -144,39 +144,39 @@ class ArchLinux:
                 self.__executor(f"swapon {drive['blk']}{partition['number']}", False)
 
     def __installPackages(self) -> None:
-        print(f"{colors.OKGREEN}==>{colors.ENDC} Install Packages")
+        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Install Packages")
         if self.__user == "root":
             for package in self.__config["packages"]:
-                print(f"    {colors.OKBLUE}-->{colors.ENDC} {package}")
+                print(f"    {colors.BOLD}{colors.OKBLUE}-->{colors.ENDC} {package}")
                 self.__executor(f"pacstrap /mnt {package}", self.__logs["packages"])
         else:
             for package in self.__config["packages"]:
-                print(f"    {colors.OKBLUE}-->{colors.ENDC} {package}")
+                print(f"    {colors.BOLD}{colors.OKBLUE}-->{colors.ENDC} {package}")
                 self.__executor(
                     f"{self.__config['aurhelper']} -S --skipreview --noconfirm {package}",
                     self.__logs["packages"],
                 )
 
     def __genFstab(self) -> None:
-        print(f"{colors.OKGREEN}==>{colors.ENDC} Generating FSTAB")
+        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Generating FSTAB")
         self.__executor("genfstab -U /mnt >> /mnt/etc/fstab", False)
 
     def __setLocale(self) -> None:
-        print(f"{colors.OKGREEN}==>{colors.ENDC} Setting Locale")
+        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Setting Locale")
         with open("/mnt/etc/locale.gen", "a") as f:
             for locale in self.__config["settings"]["locale"]:
-                print(f"    {colors.OKBLUE}-->{colors.ENDC} Generating {locale}")
-                f.write(locale)
+                print(f"    {colors.BOLD}{colors.OKBLUE}-->{colors.ENDC} Generating {locale}")
+                f.write(f"{locale}\n")
         self.__chrootExecutor("locale-gen", False)
         print(
-            f"    {colors.OKBLUE}-->{colors.ENDC} set LANG env to {self.__config['settings']['lang']}"
+            f"    {colors.BOLD}{colors.OKBLUE}-->{colors.ENDC} set LANG env to {self.__config['settings']['lang']}"
         )
         with open("/mnt/etc/locale.conf", "w") as f:
             f.write(f"LANG={self.__config['settings']['lang']}\n")
 
     def __setTimeZone(self) -> None:
         print(
-            f"{colors.OKGREEN}==>{colors.ENDC} setting TimeZone to {self.__config['settings']['timezone']}"
+            f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} setting TimeZone to {self.__config['settings']['timezone']}"
         )
         self.__chrootExecutor(
             f"ln -fs /usr/share/zoneinfo/{self.__config['settings']['timezone']} /etc/localtime",
@@ -185,7 +185,7 @@ class ArchLinux:
         self.__chrootExecutor("hwclock --systohc --utc", False)
 
     def __installBootLoader(self):
-        print(f"{colors.OKGREEN}==>{colors.ENDC} Generating BootLoader")
+        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Generating BootLoader")
         self.__chrootExecutor(
             f"grub-install --recheck {self.__config['settings']['drive']['blk']}", False
         )
@@ -193,22 +193,22 @@ class ArchLinux:
 
     def __setHostName(self) -> None:
         print(
-            f"{colors.OKGREEN}==>{colors.ENDC} set hostname to {self.__config['settings']['hostname']}"
+            f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} set hostname to {self.__config['settings']['hostname']}"
         )
         with open("/mnt/etc/hostname", "w") as f:
             f.write(self.__config["settings"]["hostname"])
 
     def __setHosts(self) -> None:
-        print(f"{colors.OKGREEN}==>{colors.ENDC} set hosts")
+        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} set hosts")
         with open("/mnt/etc/hosts", "a") as f:
             f.write(
                 f"127.0.0.1     localhost.localdomain        localhost\n::1           localhost.localdomain        localhost\n127.0.1.1    {self.__config['settings']['hostname']}.localdomain    {self.__config['settings']['hostname']}"
             )
 
     def __enableServices(self):
-        print(f"{colors.OKGREEN}==>{colors.ENDC} Enabling Services")
+        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Enabling Services")
         for service in self.__config["services"]:
-            print(f"    {colors.OKBLUE}-->{colors.ENDC} {service}")
+            print(f"    {colors.BOLD}{colors.OKBLUE}-->{colors.ENDC} {service}")
             if self.__user == "root":
                 self.__chrootExecutor(
                     f"systemctl enable {service}", self.__logs["services"]
@@ -220,14 +220,14 @@ class ArchLinux:
 
     def __setRootPassword(self):
         password = self.__config["account"]["rootpassword"]
-        print(f"{colors.OKGREEN}==>{colors.ENDC} Set Root Password")
+        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Set Root Password")
         self.__chrootExecutor(f"echo -e '{password}\n{password}\n' | passwd", False)
 
     def __createUser(self):
         username = self.__config["account"]["username"]
         password = self.__config["account"]["password"]
         shell = self.__config["settings"]["shell"]
-        print(f"{colors.OKGREEN}==>{colors.ENDC} Creating User ({username})")
+        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Creating User ({username})")
         self.__chrootExecutor(
             f"useradd -m -g users -G wheel -s {shell} {username}",
             False,
@@ -241,7 +241,7 @@ class ArchLinux:
                 r"sed -i 's/^#\s*\(%wheel\s*ALL=(ALL:ALL)\s*ALL\)/\1/' /mnt/etc/sudoers",
                 False,
             )
-            print(f"{colors.OKGREEN}==>{colors.ENDC} Config sudoers file")
+            print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Config sudoers file")
         elif conf == "UN":
             self.__executor(
                 r"sudo sed -i 's/^#\s*\(%wheel\s*ALL=(ALL:ALL)\s*NOPASSWD:\s*ALL\)/\1/' /etc/sudoers",
@@ -268,7 +268,7 @@ class ArchLinux:
         )
 
     def __umount(self):
-        print(f"{colors.OKGREEN}==>{colors.ENDC} Umount Partitions")
+        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Umount Partitions")
         self.__executor("umount -R /mnt", False)
 
     def __reboot(self):
@@ -277,7 +277,7 @@ class ArchLinux:
         self.__executor("reboot", True)
 
     def __installAURHelper(self):
-        print(f"{colors.OKGREEN}==>{colors.ENDC} Install AUR helper")
+        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Install AUR helper")
         self.__executor(
             f"cd /tmp && git clone http://aur.archlinux.org/{self.__config['aurhelper']}-bin.git",
             False,
@@ -288,9 +288,9 @@ class ArchLinux:
         )
 
     def __runUserScripts(self):
-        print(f"{colors.OKGREEN}==>{colors.ENDC} Execute Your Scripts")
+        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Execute Your Scripts")
         for script in self.__config["scripts"]:
-            print(f"    {colors.OKBLUE}-->{colors.ENDC} {script['name']}")
+            print(f"    {colors.BOLD}{colors.OKBLUE}-->{colors.ENDC} {script['name']}")
             self.__executor(f"chmod +x {script['value']}", False)
             self.__executor(script["value"], self.__logs["scripts"])
 
