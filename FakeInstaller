@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import yaml, sys, os, requests
+import yaml, sys, os, requests, subprocess
 
 
 class colors:
@@ -159,6 +159,8 @@ class ArchLinux:
 
     def __genFstab(self) -> None:
         print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Generating FSTAB")
+        with open('/mnt/etc/fstab', 'a') as fstab:
+            subprocess.run('genfstab -U /mnt', stdout=fstab)
         self.__executor("/usr/bin/genfstab -pU /mnt >> /mnt/etc/fstab", False)
 
     def __setLocale(self) -> None:
