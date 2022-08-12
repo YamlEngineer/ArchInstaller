@@ -30,7 +30,13 @@ class ArchLinux:
                 self.__config = config["user"]
 
     def __ascii(self) -> None:
-        self.__executor("bash ./ascii.sh", True)
+        ascii = """    ______      __        ____           __        ____         
+   / ____/___ _/ /_____  /  _/___  _____/ /_____ _/ / /__  _____
+  / /_  / __ `/ //_/ _ \ / // __ \/ ___/ __/ __ `/ / / _ \/ ___/
+ / __/ / /_/ / ,< /  __// // / / (__  ) /_/ /_/ / / /  __/ /    
+/_/    \__,_/_/|_|\___/___/_/ /_/____/\__/\__,_/_/_/\___/_/     
+        """
+        print(ascii)
 
     def __chrootExecutor(self, command: str, logs: bool) -> None:
         if logs:
@@ -334,7 +340,6 @@ class ArchLinux:
             self.__installPackages()
             self.__runUserScripts()
             self.__enableServices()
-            self.__sudoersConf("CN")
-
+            self.__sudoersConf("CN") 
 
 ArchLinux().start()

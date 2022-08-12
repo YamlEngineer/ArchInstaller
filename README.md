@@ -25,10 +25,10 @@ Install archlinux and config based on a yaml configuration
 Then we can clone this template or download script directly
 
 ```sh
-wget archinstaller.ml -O FakeInstaller
+wget archinstaller.ml -O ArchInstaller
 # or git clone https://github.com/FakeSudo/ArchInstaller
-chmod +x FakeInstaller
-./FakeInstaller
+chmod +x ArchInstaller
+./ArchInstaller # or ./ArchInstaller {url}
 ```
 
 NOTE: before running Installer write config.yaml or pass a pastbin or git gist url to script
