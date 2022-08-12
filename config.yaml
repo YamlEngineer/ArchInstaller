@@ -11,10 +11,10 @@ root:
       - fa_IR UTF-8
     lang: en_US.UTF-8
     timezone: Asia/Tehran
-    shell: /usr/bin/fish
+    shell: /bin/bash
     drive:
       blk: /dev/sda
-      erase: true
+      erase: false
       partitions: # used fdisk conf
         - label: BOOT
           size: +512M
@@ -43,8 +43,8 @@ root:
     - linux-headers
     - grub
     - efibootmgr
-    - intel-ucode
-    - fish
+    - python-requests # dont remove this if you have user config
+    - python-yaml # dont remove this if you have user config
   services:
     - NetworkManager
 
