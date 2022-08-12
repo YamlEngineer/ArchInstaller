@@ -21,11 +21,6 @@ Install archlinux and config based on a yaml configuration
 
 
 ### Installation
-First of all we need to install requirements
-
-```sh
-pip install pyyaml requests
-```
 
 Then we can clone this template or download script directly
 
@@ -133,16 +128,16 @@ Note: if you configured user setting you should rerun installer command after re
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/FakeSudo/DevOps.nvim?style=for-the-badge
-[contributors-url]: https://github.com/FakeSudo/DevOps.nvim/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/FakeSudo/DevOps.nvim?style=for-the-badge
-[forks-url]: https://github.com/FakeSudo/DevOps.nvim/network/members
-[stars-shield]: https://img.shields.io/github/stars/FakeSudo/DevOps.nvim?style=for-the-badge
-[stars-url]: https://github.com/FakeSudo/DevOps.nvim/stargazers
-[issues-shield]: https://img.shields.io/github/issues/FakeSudo/DevOps.nvim?style=for-the-badge
-[issues-url]: https://github.com/FakeSudo/DevOps.nvim/issues
-[license-shield]: https://img.shields.io/github/license/FakeSudo/DevOps.nvim?style=for-the-badge
-[license-url]: https://github.com/FakeSudo/DevOps.nvim/blob/main/LICENSE.md
+[contributors-shield]: https://img.shields.io/github/contributors/FakeSudo/ArchInstaller?style=for-the-badge
+[contributors-url]: https://github.com/FakeSudo/ArchInstaller/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/FakeSudo/ArchInstaller?style=for-the-badge
+[forks-url]: https://github.com/FakeSudo/ArchInstaller/network/members
+[stars-shield]: https://img.shields.io/github/stars/FakeSudo/ArchInstaller?style=for-the-badge
+[stars-url]: https://github.com/FakeSudo/ArchInstaller/stargazers
+[issues-shield]: https://img.shields.io/github/issues/FakeSudo/ArchInstaller?style=for-the-badge
+[issues-url]: https://github.com/FakeSudo/ArchInstaller/issues
+[license-shield]: https://img.shields.io/github/license/FakeSudo/ArchInstaller?style=for-the-badge
+[license-url]: https://github.com/FakeSudo/ArchInstaller/blob/main/LICENSE.md
 [telegram-shield]: https://img.shields.io/badge/Telegram-blue.svg?style=for-the-badge&logo=telegram
 [telegram-url]: https://t.me/FakeSudo
 
