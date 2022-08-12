@@ -85,7 +85,7 @@ Config will separate into user settings that run after Installation and root set
                 
             type of the partition
 
-            commons: `uefi/linux/swap`
+            commons: `uefi/linux/swap & all fdisk types`
 
         * number
 
