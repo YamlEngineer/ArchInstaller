@@ -46,6 +46,7 @@ root:
     - networkmanager
     - python-requests # dont remove this if you have user config
     - python-yaml # dont remove this if you have user config
+    - git # dont remove this if you have user config
   services:
     - NetworkManager
 
