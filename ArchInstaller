@@ -1,16 +1,38 @@
 #!/usr/bin/env python
-import yaml, sys, os, requests, subprocess
+import concurrent.futures, yaml, requests, time, sys, os
+from subprocess import run, PIPE
+
+class TUI:
+    OKPURPLE = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    ANIMATION= [
+    "[        ]",
+    "[=       ]",
+    "[==      ]",
+    "[===     ]",
+    "[====    ]",
+    "[=====   ]",
+    "[======  ]",
+    "[======= ]",
+    "[========]",
+    "[ =======]",
+    "[  ======]",
+    "[   =====]",
+    "[    ====]",
+    "[     ===]",
+    "[      ==]",
+    "[       =]",
+    "[        ]",
+    "[        ]"
+    ]
 
 
-class colors:
-    OKBLUE = "\033[94m"
-    OKCYAN = "\033[96m"
-    OKGREEN = "\033[92m"
-    ENDC = "\033[0m"
-    BOLD = "\033[1m"
 
 
-class ArchLinux:
+class ArchInstaller:
     def __init__(self) -> None:
         if len(sys.argv) != 1:
             with open("./config.yaml", mode="w") as f:
@@ -18,324 +40,273 @@ class ArchLinux:
                 f.write(response.text)
         with open("./config.yaml") as data:
             config = yaml.load(data, Loader=yaml.FullLoader)
-            self.__logs = config["logs"]
-            self.__user = os.environ.get("USER")
-            if self.__user == "root":
-                self.__config = config["root"]
+            if os.environ.get("USER") == "root":
+                self.config = config["root"]
             else:
-                self.__config = config["user"]
+                self.config = config["user"]
 
-    def __ascii(self) -> None:
-        ascii = """    ___    ____  ________  _______   ________________    __    __    __________ 
+    def ascii(self) -> None:
+        ASCII = """    ___    ____  ________  _______   ________________    __    __    __________ 
    /   |  / __ \/ ____/ / / /  _/ | / / ___/_  __/   |  / /   / /   / ____/ __ \\
   / /| | / /_/ / /   / /_/ // //  |/ /\__ \ / / / /| | / /   / /   / __/ / /_/ /
  / ___ |/ _, _/ /___/ __  // // /|  /___/ // / / ___ |/ /___/ /___/ /___/ _, _/ 
 /_/  |_/_/ |_|\____/_/ /_/___/_/ |_//____//_/ /_/  |_/_____/_____/_____/_/ |_|  
 """
-        print(ascii)
+        print(TUI.OKGREEN + ASCII + TUI.ENDC)
 
-    def __chrootExecutor(self, command: str, logs: bool) -> None:
-        if logs:
-            os.system(f"chroot /mnt {command} && exit")
+    def exec(self,command: str, discription: str|None = None , chroot:bool = False):
+        if chroot:
+            sh = 'arch-chroot /mnt ' + command  
         else:
-            os.system(
-                f"chroot /mnt {command} >/dev/null 2>&1 && exit >/dev/null 2>&1"
-            )
+            sh = command
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = executor.submit(lambda: run(sh, stdout=PIPE, stderr=PIPE, shell=True, encoding='utf-8'))
+            if discription != None:
+                i = 0
+                while future.running():
+                    print(discription + ' ' + TUI.OKPURPLE + TUI.ANIMATION[i % len(TUI.ANIMATION)] + TUI.ENDC, end='\r')
+                    time.sleep(.1)
+                    i += 1
+                if future.result().returncode == 0:
+                    print(discription + f' {TUI.OKGREEN}✔{TUI.ENDC}' + "          ", end='\n')
+                else:
+                    print(discription + f' {TUI.FAIL}✘{TUI.ENDC}' + "          ", end='\n')
 
-    def __executor(self, command: str, logs: bool) -> None:
-        if logs:
-            os.system(command)
-        else:
-            os.system(f"{command} >/dev/null 2>&1")
+    def setNtp(self) -> None:
+        discription = f"{TUI.OKGREEN}==>{TUI.ENDC} set ntp to {self.config['settings']['ntp']}"
+        command = f"timedatectl set-ntp {self.config['settings']['ntp']}"
+        self.exec(command,discription)
 
-    def __setNtp(self) -> None:
-        print(
-            f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} set ntp to {self.__config['settings']['ntp']}"
-        )
-        self.__executor(
-            f"timedatectl set-ntp {self.__config['settings']['ntp']}", False
-        )
+    def driveConfigurator(self) -> None:
+        print(f"{TUI.OKGREEN}==>{TUI.ENDC} Config Hard Drive")  # with fdisk
 
-    def __driveConfigurator(self) -> None:
-        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Config Hard Drive")  # with fdisk
-
-        drive = self.__config["settings"]["drive"]
+        drive = self.config["settings"]["drive"]
 
         # Format Hard Drive
         if drive["erase"]:
-            print(
-                f"    {colors.BOLD}{colors.OKBLUE}-->{colors.ENDC} Formatting Drive : {drive['blk']}"
-            )
-            self.__executor(f"echo 'g\nw\n' | fdisk {drive['blk']}", False)
+            discription = f"    {TUI.OKBLUE}-->{TUI.ENDC} Formatting Drive : {drive['blk']}"
+            command = f"echo 'g\nw\n' | fdisk {drive['blk']}"
+            self.exec(command, discription)
 
         # Making Partitions
-        print(f"    {colors.BOLD}{colors.OKBLUE}-->{colors.ENDC} Create Partitions")
+        print(f"    {TUI.OKBLUE}-->{TUI.ENDC} Create Partitions")
         for partition in drive["partitions"]:
             size = partition["size"]
             number = partition["number"]
             label = partition["label"]
             filesystem = partition["filesystem"]
-            print(
-                f"        {colors.BOLD}{colors.OKBLUE}-->{colors.ENDC} Partition : {partition['label']}"
-            )
+            discription = f"        {TUI.OKBLUE}-->{TUI.ENDC} Partition : {partition['label']}"
             if partition["number"] == 1:
-                self.__executor(
-                    f"echo 'n\n{number}\n\n{size}\nt\n{filesystem}\nw\n' | fdisk {drive['blk']}",
-                    False,
-                )
+                command = f"echo 'n\n{number}\n\n{size}\nt\n{filesystem}\nw\n' | fdisk {drive['blk']}"
             else:
-                self.__executor(
-                    f"echo 'n\n{number}\n\n{size}\nt\n{number}\n{filesystem}\nw\n' | fdisk {drive['blk']}",
-                    False,
-                )
-
+                command = f"echo 'n\n{number}\n\n{size}\nt\n{number}\n{filesystem}\nw\n' | fdisk {drive['blk']}"
+            self.exec(command, discription)
+            
             # Make FileSystem & add Label to Partition
-            print(
-                f"            {colors.BOLD}{colors.OKCYAN}-->{colors.ENDC} Make filesystem : {filesystem}"
-            )
+            discription = f"            {TUI.OKPURPLE}-->{TUI.ENDC} Make filesystem : {filesystem}"
             match filesystem:
                 case "uefi":
-                    self.__executor(f"mkfs.fat -F32 {drive['blk']}{number}", False)
-                    self.__executor(
-                        f"fatlabel {drive['blk']}{number} {label}",
-                        False,
-                    )
+                    self.exec(f"mkfs.fat -F32 {drive['blk']}{number}")
+                    command = f"fatlabel {drive['blk']}{number} {label}"
                 case "linux":
-                    self.__executor(
-                        f"echo 'y\n' | mkfs.ext4 -L {label} {drive['blk']}{number}",
-                        False,
-                    )
+                    command = f"echo 'y\n' | mkfs.ext4 -L {label} {drive['blk']}{number}"
                 case "swap":
-                    self.__executor(f"mkswap {drive['blk']}{number}", False)
+                    command = f"mkswap {drive['blk']}{number}"
+            self.exec(command,discription)
 
-    def __mount(self):
+    def mount(self):
 
-        drive = self.__config["settings"]["drive"]
+        drive = self.config["settings"]["drive"]
         # Mount Partitions
-        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Mount Partitions ")
+        print(f"{TUI.OKGREEN}==>{TUI.ENDC} Mount Partitions ")
 
         # root -> /mnt
-        print(f"    {colors.BOLD}{colors.OKBLUE}-->{colors.ENDC} ROOT")
         while not os.path.exists("/dev/disk/by-label/ROOT"):
-            self.__executor("sleep 1", False)
-        self.__executor(
-            f"mount /dev/disk/by-label/ROOT /mnt",
-            False,
-        )
-        self.__executor("mkdir -p /mnt/{home,boot/efi}", False)
+            time.sleep(1)
+        discription = f"    {TUI.OKBLUE}-->{TUI.ENDC} ROOT"
+        command = f"mount /dev/disk/by-label/ROOT /mnt"
+        self.exec(command,discription)
+
+        self.exec("mkdir -p /mnt/{home,boot/efi}")
 
         for partition in drive["partitions"]:
+            
+            # boot -> /mnt/boot/efi
             if partition["label"] == "BOOT":
-                # boot -> /mnt/boot/efi
-                print(f"    {colors.OKBLUE}-->{colors.ENDC} BOOT")
-                if partition['filesystem'] == 'uefi':
-                    self.__executor(
-                        f"mount {drive['blk']}{partition['number']} /mnt/boot/efi",
-                        False,
-                    )
-                else:
-                    self.__executor(
-                        f"mount {drive['blk']}{partition['number']} /mnt/boot",
-                        False,
-                    )
+                discription = f"    {TUI.OKBLUE}-->{TUI.ENDC} BOOT"
+                command = f"mount {drive['blk']}{partition['number']} /mnt/boot/efi"
+                self.exec(command,discription)    
+            
+            # Mount Home Partition if exist
+            # home -> /mnt/home
             if partition["label"] == "HOME":
-                # Mount Home Partition if exist
-                # home -> /mnt/home
-                print(f"    {colors.BOLD}{colors.OKBLUE}-->{colors.ENDC} HOME")
-                self.__executor(
-                    f"mount {drive['blk']}{partition['number']} /mnt/home",
-                    False,
-                )
+                discription = f"    {TUI.OKBLUE}-->{TUI.ENDC} HOME"
+                command = f"mount {drive['blk']}{partition['number']} /mnt/home"
+                self.exec(command,discription)
+
+            # enable swap if exists
             if partition["label"] == "SWAP":
-                # enable swap if exists
-                print(f"    {colors.OKBLUE}-->{colors.ENDC} Enable SWAP Partition ")
-                self.__executor(f"swapon {drive['blk']}{partition['number']}", False)
+                discription = f"    {TUI.OKBLUE}-->{TUI.ENDC} Enable SWAP Partition "
+                command = f"swapon {drive['blk']}{partition['number']}"
+                self.exec(command,discription)
 
-    def __installPackages(self) -> None:
-        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Install Packages")
-        if self.__user == "root":
-            for package in self.__config["packages"]:
-                print(f"    {colors.BOLD}{colors.OKBLUE}-->{colors.ENDC} {package}")
-                self.__executor(f"pacstrap /mnt {package}", self.__logs["packages"])
+    def installPackages(self) -> None:
+        print(f"{TUI.OKGREEN}==>{TUI.ENDC} Install Packages")
+        if os.environ.get('USER') == "root":
+            for package in self.config["packages"]:
+                discription = f"    {TUI.OKBLUE}-->{TUI.ENDC} {package}"
+                command = f"pacstrap /mnt {package}"
+                self.exec(command,discription)
         else:
-            for package in self.__config["packages"]:
-                print(f"    {colors.BOLD}{colors.OKBLUE}-->{colors.ENDC} {package}")
-                self.__executor(
-                    f"{self.__config['aurhelper']} -S --skipreview --noconfirm {package}",
-                    self.__logs["packages"],
-                )
+            for package in self.config["packages"]:
+                discription = f"    {TUI.OKBLUE}-->{TUI.ENDC} {package}"
+                command = f"{self.config['aurhelper']} -S --skipreview --noconfirm {package}"
+                self.exec(command,discription)
 
-    def __genFstab(self) -> None:
-        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Generating FSTAB")
+    def genFstab(self) -> None:
+        print(f"{TUI.OKGREEN}==>{TUI.ENDC} Generating FSTAB {TUI.OKGREEN}✔{TUI.ENDC}")
         with open('/mnt/etc/fstab', 'w') as fstab:
-            subprocess.run(['genfstab', '-U', '/mnt'], stdout=fstab)
+            run(['genfstab', '-U', '/mnt'], stdout=fstab)
 
-    def __setLocale(self) -> None:
-        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Setting Locale")
+    def setLocale(self) -> None:
+        print(f"{TUI.OKGREEN}==>{TUI.ENDC} Setting Locale")
         with open("/mnt/etc/locale.gen", "a") as f:
-            for locale in self.__config["settings"]["locale"]:
-                print(f"    {colors.BOLD}{colors.OKBLUE}-->{colors.ENDC} Generating {locale}")
+            for locale in self.config["settings"]["locale"]:
+                print(f"    {TUI.OKBLUE}-->{TUI.ENDC} Generating {locale} {TUI.OKGREEN}✔{TUI.ENDC}")
                 f.write(f"{locale}\n")
-        self.__chrootExecutor("locale-gen", False)
-        print(
-            f"    {colors.BOLD}{colors.OKBLUE}-->{colors.ENDC} set LANG env to {self.__config['settings']['lang']}"
-        )
+        self.exec("locale-gen", chroot=True)
+        print(f"    {TUI.OKBLUE}-->{TUI.ENDC} set LANG env to {self.config['settings']['lang']} {TUI.OKGREEN}✔{TUI.ENDC}")
         with open("/mnt/etc/locale.conf", "w") as f:
-            f.write(f"LANG={self.__config['settings']['lang']}\n")
+            f.write(f"LANG={self.config['settings']['lang']}\n")
 
-    def __setTimeZone(self) -> None:
-        print(
-            f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} setting TimeZone to {self.__config['settings']['timezone']}"
-        )
-        self.__chrootExecutor(
-            f"ln -fs /usr/share/zoneinfo/{self.__config['settings']['timezone']} /etc/localtime",
-            False,
-        )
-        self.__chrootExecutor("hwclock --systohc --utc", False)
+    def setTimeZone(self) -> None:
+        discription = f"{TUI.OKGREEN}==>{TUI.ENDC} setting TimeZone to {self.config['settings']['timezone']}"
+        command = f"ln -fs /usr/share/zoneinfo/{self.config['settings']['timezone']} /etc/localtime"
+        self.exec(command, discription, True)
+        self.exec("hwclock --systohc --utc", chroot=True)
 
-    def __installBootLoader(self):
-        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Generating BootLoader")
-        bootloader = self.__config['settings']['bootloader']
-        if 'efidir' in bootloader:
-            self.__chrootExecutor(
-                f"grub-install --target={bootloader['target']} --boot-directory=/boot --efi-directory=/boot/efi --bootloader-id={bootloader['id']} --recheck", False
-            )
-        else:
-            self.__chrootExecutor(
-                f"grub-install --target={bootloader['target']} --boot-directory=/boot --bootloader-id={bootloader['id']} --recheck", False
-            )
+    def installBootLoader(self):
+        discription = f"{TUI.OKGREEN}==>{TUI.ENDC} Generating BootLoader"
+        command = f"grub-install --recheck"
+        self.exec(command,discription,True)
+        self.exec(f"grub-mkconfig -o /boot/grub/grub.cfg", chroot=True)
 
-        self.__chrootExecutor(f"grub-mkconfig -o /boot/grub/grub.cfg", False)
-
-    def __setHostName(self) -> None:
-        print(
-            f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} set hostname to {self.__config['settings']['hostname']}"
-        )
+    def setHostName(self) -> None:
+        print(f"{TUI.OKGREEN}==>{TUI.ENDC} set hostname to {self.config['settings']['hostname']} {TUI.OKGREEN}✔{TUI.ENDC}")
         with open("/mnt/etc/hostname", "w") as f:
-            f.write(self.__config["settings"]["hostname"])
+            f.write(self.config["settings"]["hostname"])
 
-    def __setHosts(self) -> None:
-        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} set hosts")
+    def setHosts(self) -> None:
+        print(f"{TUI.OKGREEN}==>{TUI.ENDC} set hosts {TUI.OKGREEN}✔{TUI.ENDC}")
         with open("/mnt/etc/hosts", "a") as f:
             f.write(
-                f"127.0.0.1     localhost.localdomain        localhost\n::1           localhost.localdomain        localhost\n127.0.1.1    {self.__config['settings']['hostname']}.localdomain    {self.__config['settings']['hostname']}"
+                f"127.0.0.1     localhost.localdomain        localhost\n::1           localhost.localdomain        localhost\n127.0.1.1    {self.config['settings']['hostname']}.localdomain    {self.config['settings']['hostname']}"
             )
 
-    def __enableServices(self):
-        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Enabling Services")
-        for service in self.__config["services"]:
-            print(f"    {colors.BOLD}{colors.OKBLUE}-->{colors.ENDC} {service}")
-            if self.__user == "root":
-                self.__chrootExecutor(
-                    f"systemctl enable {service}", self.__logs["services"]
-                )
+    def enableServices(self):
+        print(f"{TUI.OKGREEN}==>{TUI.ENDC} Enabling Services")
+        for service in self.config["services"]:
+            discription = f"    {TUI.OKBLUE}-->{TUI.ENDC} {service}"
+            if os.environ.get('USER') == "root":
+                command = f"systemctl enable {service}"
+                chroot = True
             else:
-                self.__executor(
-                    f"sudo systemctl enable {service}", self.__logs["services"]
-                )
+                command = f"sudo systemctl enable {service}"
+                chroot = False
+            self.exec(command,discription,chroot)
 
-    def __setRootPassword(self):
-        password = self.__config["account"]["rootpassword"]
-        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Set Root Password")
-        self.__chrootExecutor(f"echo -e '{password}\n{password}\n' | passwd", False)
+    def setRootPassword(self):
+        password = self.config["account"]["rootpassword"]
+        discription = f"{TUI.OKGREEN}==>{TUI.ENDC} Set Root Password"
+        self.exec(f"echo -e '{password}\n{password}\n' | passwd", discription, True)
 
-    def __createUser(self):
-        username = self.__config["account"]["username"]
-        password = self.__config["account"]["password"]
-        shell = self.__config["settings"]["shell"]
-        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Creating User ({username})")
-        self.__chrootExecutor(
-            f"useradd -m -g users -G wheel -s {shell} {username}",
-            False,
-        )
-        self.__chrootExecutor(f"echo -e '{password}\n{password}\n' | passwd {username}", False)
+    def createUser(self):
+        username = self.config["account"]["username"]
+        password = self.config["account"]["password"]
+        shell = self.config["settings"]["shell"]
+        discription = f"{TUI.OKGREEN}==>{TUI.ENDC} Creating User ({username})"
+        command = f"useradd -m -g users -G wheel -s {shell} {username}"
+        self.exec(command, discription, True)
+        self.exec(f"echo -e '{password}\n{password}\n' | passwd {username}", chroot=True)
 
-    def __sudoersConf(self, conf):
+    def sudoersConf(self, conf):
         if conf == "UA":
-            self.__chrootExecutor("chmod 644 /etc/sudoers", False)
-            self.__executor(
-                r"sed -i 's/^#\s*\(%wheel\s*ALL=(ALL:ALL)\s*ALL\)/\1/' /mnt/etc/sudoers",
-                False,
-            )
-            print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Config sudoers file")
+            self.exec("chmod 644 /etc/sudoers", chroot=True)
+            discription = f"{TUI.OKGREEN}==>{TUI.ENDC} Config sudoers file"
+            command = r"sed -i 's/^#\s*\(%wheel\s*ALL=(ALL:ALL)\s*ALL\)/\1/' /mnt/etc/sudoers"
+            self.exec(command,discription)
         elif conf == "UN":
-            self.__executor(
-                r"sudo sed -i 's/^#\s*\(%wheel\s*ALL=(ALL:ALL)\s*NOPASSWD:\s*ALL\)/\1/' /etc/sudoers",
-                True,
-            )
+            self.exec(r"sudo sed -i 's/^#\s*\(%wheel\s*ALL=(ALL:ALL)\s*NOPASSWD:\s*ALL\)/\1/' /etc/sudoers")
         elif conf == "CN":
-            self.__executor(
-                r"sudo sed -i 's/^\s*\(%wheel\s*ALL=(ALL:ALL)\s*NOPASSWD:\s*ALL\)/# \1/' /etc/sudoers",
-                True,
-            )
+            self.exec(r"sudo sed -i 's/^\s*\(%wheel\s*ALL=(ALL:ALL)\s*NOPASSWD:\s*ALL\)/# \1/' /etc/sudoers")
 
-    def __copyInstaller(self):
-        self.__executor(
-            f"mkdir -p /mnt/home/{self.__config['account']['username']}/archinstaller",
-            False,
-        )
-        self.__executor(
-            f"cp -r . /mnt/home/{self.__config['account']['username']}/archinstaller",
-            False,
-        )
-        self.__chrootExecutor(
-            f"chown -R {self.__config['account']['username']}:wheel /mnt/home/{self.__config['account']['username']}/archinstaller",
-            False,
-        )
+    def copyInstaller(self):
+        self.exec(f"mkdir -p /mnt/home/{self.config['account']['username']}/archinstaller")
+        self.exec(f"cp -r . /mnt/home/{self.config['account']['username']}/archinstaller")
+        self.exec(f"chown -R {self.config['account']['username']}:wheel /mnt/home/{self.config['account']['username']}/archinstaller", chroot=True)
+    
+    def installDependencies(self):
+        depends = ['git', 'python-yaml', 'python-requests']
+        for depend in depends:
+            self.exec(f"pactrap /mnt {depend}")
 
-    def __umount(self):
-        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Umount Partitions")
-        self.__executor("umount -R /mnt", False)
+    def umount(self):
+        discription = f"{TUI.OKGREEN}==>{TUI.ENDC} Umount Partitions {TUI.OKGREEN}✔{TUI.ENDC}"
+        command = "umount -R /mnt"
+        self.exec(command, discription)
 
-    def __reboot(self):
+    def reboot(self):
         print("====================================\nInstallation completed!!")
         input("Press enter to reboot")
-        self.__executor("reboot", True)
+        self.exec("reboot")
 
-    def __installAURHelper(self):
-        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Install AUR helper")
-        self.__executor(
-            f"cd /tmp && git clone http://aur.archlinux.org/{self.__config['aurhelper']}-bin.git",
-            False,
-        )
-        self.__executor(
-            f"cd /tmp/{self.__config['aurhelper']}-bin && makepkg -si --noconfirm",
-            self.__logs["packages"],
-        )
+    def installAURHelper(self):
+        self.exec(f"cd /tmp && git clone http://aur.archlinux.org/{self.config['aurhelper']}-bin.git")
+        discription = f"{TUI.OKGREEN}==>{TUI.ENDC} Install AUR helper"
+        command = f"cd /tmp/{self.config['aurhelper']}-bin && makepkg -si --noconfirm"
+        self.exec(command,discription)
 
-    def __runUserScripts(self):
-        print(f"{colors.BOLD}{colors.OKGREEN}==>{colors.ENDC} Execute Your Scripts")
-        for script in self.__config["scripts"]:
-            print(f"    {colors.BOLD}{colors.OKBLUE}-->{colors.ENDC} {script['name']}")
-            self.__executor(f"chmod +x {script['value']}", False)
-            self.__executor(script["value"], self.__logs["scripts"])
+    def runUserScripts(self):
+        print(f"{TUI.OKGREEN}==>{TUI.ENDC} Execute Your Scripts")
+        for script in self.config["scripts"]:
+            discription = f"    {TUI.OKBLUE}-->{TUI.ENDC} {script['name']}"
+            command = script['value']
+            if 'value' in script:
+                command = script['value']
+            elif 'makedir' in script:
+                command = 'cd ' + script['makedir'] + ' && ' + 'sudo make install clean'
+            elif 'script' in script:
+                self.exec(f"chmod +x {script['script']}")
+                command = script["script"]
+            self.exec(command, discription)
 
-    def start(self):
-        self.__ascii()
-        if self.__user == "root":
-            self.__setNtp()
-            self.__driveConfigurator()
-            self.__mount()
-            self.__installPackages()
-            self.__genFstab()
-            self.__setLocale()
-            self.__setTimeZone()
-            self.__installBootLoader()
-            self.__setHostName()
-            self.__setHosts()
-            self.__enableServices()
-            self.__setRootPassword()
-            self.__createUser()
-            self.__sudoersConf("UA")
-            self.__copyInstaller()
-            self.__umount()
-            self.__reboot()
+    def run(self):
+        self.ascii()
+        if os.environ.get('USER') == "root":
+            self.setNtp()
+            self.driveConfigurator()
+            self.mount()
+            self.installPackages()
+            self.genFstab()
+            self.setLocale()
+            self.setTimeZone()
+            self.installBootLoader()
+            self.setHostName()
+            self.setHosts()
+            self.enableServices()
+            self.setRootPassword()
+            self.createUser()
+            self.sudoersConf("UA")
+            self.copyInstaller()
+            self.installDependencies()
+            self.umount()
+            self.reboot()
         else:
-            self.__sudoersConf("UN")
-            self.__installAURHelper()
-            self.__installPackages()
-            self.__runUserScripts()
-            self.__enableServices()
-            self.__sudoersConf("CN") 
+            self.sudoersConf("UN")
+            self.installAURHelper()
+            self.installPackages()
+            self.runUserScripts()
+            self.enableServices()
+            self.sudoersConf("CN")
 
-ArchLinux().start()
+ArchInstaller().run()

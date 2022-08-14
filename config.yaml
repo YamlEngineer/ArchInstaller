@@ -30,9 +30,6 @@ root:
           size: " "
           filesystem: linux
           number: 3
-    bootloader:
-      id: grub
-      target: x86_64-efi
 
   packages: # official mirror 
   # Base Packages
@@ -44,24 +41,23 @@ root:
     - grub
     - efibootmgr
     - networkmanager
-    - python-requests # dont remove this if you have user config
-    - python-yaml # dont remove this if you have user config
-    - git # dont remove this if you have user config
   services:
     - NetworkManager
 
 user:
   scripts:
-    - name: Simple Script
-      value: ./configs/simple.sh
+    - name: by file
+      script: ./configs/simple.sh
+    - name: by value
+      value: echo FakeSudo
+    - name: by Makefile
+      makedir: .configs/
+
   aurhelper: paru # or yay
+  
   packages: # official & aur
-    - windscribe-cli
+    - pyright
     - docker
+  
   services:
     - docker
-
-logs:
-  scripts: False
-  packages: False
-  services: False
