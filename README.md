@@ -93,17 +93,6 @@ Config will separate into user settings that run after Installation and root set
 
     for more information read `fdisk` manual
 
-
-* bootloader
-
-    Id is the label that your bios will display for your archlinux install and target stand for bios version `UEFI` or `LEGACY`
-
-    common:
-    ```
-    id: grub
-    target: x86_64-efi or i386 for LEGACY
-    ```
-
 * base packages
 
     Packages needed for booting the system
