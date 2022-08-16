@@ -68,9 +68,9 @@ class ArchInstaller:
                     time.sleep(.1)
                     i += 1
                 if future.result().returncode == 0:
-                    print(discription + f' {TUI.OKGREEN}✔{TUI.ENDC}' + "          ", end='\n')
+                    print(discription + f' {TUI.OKGREEN}✔{TUI.ENDC}' + "                            ", end='\n')
                 else:
-                    print(discription + f' {TUI.FAIL}✘{TUI.ENDC}' + "          ", end='\n')
+                    print(discription + f' {TUI.FAIL}✘{TUI.ENDC}' + "                               ", end='\n')
 
     def setNtp(self) -> None:
         discription = f"{TUI.OKGREEN}==>{TUI.ENDC} set ntp to {self.config['settings']['ntp']}"
@@ -270,7 +270,6 @@ class ArchInstaller:
         print(f"{TUI.OKGREEN}==>{TUI.ENDC} Execute Your Scripts")
         for script in self.config["scripts"]:
             discription = f"    {TUI.OKBLUE}-->{TUI.ENDC} {script['name']}"
-            command = script['value']
             if 'value' in script:
                 command = script['value']
             elif 'makedir' in script:
@@ -278,6 +277,9 @@ class ArchInstaller:
             elif 'script' in script:
                 self.exec(f"chmod +x {script['script']}")
                 command = script["script"]
+            else:
+                discription = f"{script['name']} : Yaml file is incorret"
+                command = "pwd"
             self.exec(command, discription)
 
     def run(self):

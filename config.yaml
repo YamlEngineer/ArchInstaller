@@ -48,10 +48,10 @@ user:
   scripts:
     - name: by file
       script: ./configs/simple.sh
-    - name: by value
-      value: echo FakeSudo
-    - name: by Makefile
-      makedir: .configs/
+  #  - name: by value
+  #    value: echo FakeSudo
+  #  - name: by Makefile
+  #    makedir: .configs/
 
   aurhelper: paru # or yay
   
