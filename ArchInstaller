@@ -270,16 +270,14 @@ class ArchInstaller:
         print(f"{TUI.OKGREEN}==>{TUI.ENDC} Execute Your Scripts")
         for script in self.config["scripts"]:
             discription = f"    {TUI.OKBLUE}-->{TUI.ENDC} {script['name']}"
-            if 'value' in script:
-                command = script['value']
-            elif 'makedir' in script:
-                command = 'cd ' + script['makedir'] + ' && ' + 'sudo make install clean'
+            if 'shell' in script:
+                command = script['shell']
             elif 'script' in script:
                 self.exec(f"chmod +x {script['script']}")
                 command = script["script"]
             else:
-                discription = f"{script['name']} : Yaml file is incorret"
-                command = "pwd"
+                discription += " : Yaml file is incorret"
+                command = "fakesudo :)"
             self.exec(command, discription)
 
     def run(self):
