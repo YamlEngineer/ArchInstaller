@@ -255,10 +255,10 @@ class ArchInstaller:
         self.exec(f"chown -R {self.config['account']['username']}:wheel /mnt/home/{self.config['account']['username']}/archinstaller", chroot=True)
     
     def installDependencies(self):
-        print(f"{TUI.OKGREEN}==>{TUI.ENDC} Install dependencies {TUI.OKGREEN}✔{TUI.ENDC}")
+        description = f"{TUI.OKGREEN}==>{TUI.ENDC} Install dependencies"
         depends = ['git', 'python-yaml', 'python-requests']
-        for depend in depends:
-            self.exec(f"pacstrap /mnt {depend}")
+        command = "pacstrap /mnt " + depends.join(' ')
+        self.exec(command, description)
 
     def umount(self):
         discription = f"{TUI.OKGREEN}==>{TUI.ENDC} Umount Partitions {TUI.OKGREEN}✔{TUI.ENDC}"
