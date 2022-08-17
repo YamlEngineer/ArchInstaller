@@ -49,7 +49,7 @@ user:
     - name: by file
       script: ./configs/simple.sh
     - name: inline shell
-      shell: FakeSudo
+      shell: echo FakeSudo
 
   aurhelper: paru # or yay
   
