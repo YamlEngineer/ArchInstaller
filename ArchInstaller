@@ -63,28 +63,28 @@ class ArchInstaller:
 """
         print(TUI.OKGREEN + ASCII + TUI.ENDC)
 
-    def exec(self,command: str, discription: str|None = None , chroot:bool = False):
+    def exec(self,command: str, description: str|None = None , chroot:bool = False):
         if chroot:
             sh = 'arch-chroot /mnt ' + command  
         else:
             sh = command
         with concurrent.futures.ThreadPoolExecutor() as executor:
             future = executor.submit(lambda: run(sh, stdout=PIPE, stderr=PIPE, shell=True, encoding='utf-8'))
-            if discription != None:
+            if description != None:
                 i = 0
                 while future.running():
-                    print(discription + ' ' + TUI.OKPURPLE + TUI.ANIMATION[i % len(TUI.ANIMATION)] + TUI.ENDC, end='\r')
+                    print(description + ' ' + TUI.OKPURPLE + TUI.ANIMATION[i % len(TUI.ANIMATION)] + TUI.ENDC, end='\r')
                     time.sleep(.1)
                     i += 1
                 if future.result().returncode == 0:
-                    print(discription + f' {TUI.OKGREEN}✔{TUI.ENDC}' + "                            ", end='\n')
+                    print(description + f' {TUI.OKGREEN}✔{TUI.ENDC}' + "                            ", end='\n')
                 else:
-                    print(discription + f' {TUI.FAIL}✘{TUI.ENDC}' + "                               ", end='\n')
+                    print(description + f' {TUI.FAIL}✘{TUI.ENDC}' + "                               ", end='\n')
     
     def setNtp(self) -> None:
-        discription = f"{TUI.OKGREEN}==>{TUI.ENDC} set ntp to {self.config['settings']['ntp']}"
+        description = f"{TUI.OKGREEN}==>{TUI.ENDC} set ntp to {self.config['settings']['ntp']}"
         command = f"timedatectl set-ntp {self.config['settings']['ntp']}"
-        self.exec(command,discription)
+        self.exec(command,description)
 
     def driveConfigurator(self) -> None:
         print(f"{TUI.OKGREEN}==>{TUI.ENDC} Config Hard Drive")  # with fdisk
@@ -93,9 +93,9 @@ class ArchInstaller:
 
         # Format Hard Drive
         if drive["erase"]:
-            discription = f"    {TUI.OKBLUE}-->{TUI.ENDC} Formatting Drive : {drive['blk']}"
+            description = f"    {TUI.OKBLUE}-->{TUI.ENDC} Formatting Drive : {drive['blk']}"
             command = f"echo 'g\nw\n' | fdisk {drive['blk']}"
-            self.exec(command, discription)
+            self.exec(command, description)
 
         # Making Partitions
         print(f"    {TUI.OKBLUE}-->{TUI.ENDC} Create Partitions")
@@ -104,15 +104,15 @@ class ArchInstaller:
             number = partition["number"]
             label = partition["label"]
             filesystem = partition["filesystem"]
-            discription = f"        {TUI.OKBLUE}-->{TUI.ENDC} Partition : {partition['label']}"
+            description = f"        {TUI.OKBLUE}-->{TUI.ENDC} Partition : {partition['label']}"
             if partition["number"] == 1:
                 command = f"echo 'n\n{number}\n\n{size}\nt\n{filesystem}\nw\n' | fdisk {drive['blk']}"
             else:
                 command = f"echo 'n\n{number}\n\n{size}\nt\n{number}\n{filesystem}\nw\n' | fdisk {drive['blk']}"
-            self.exec(command, discription)
+            self.exec(command, description)
             
             # Make FileSystem & add Label to Partition
-            discription = f"            {TUI.OKPURPLE}-->{TUI.ENDC} Make filesystem : {filesystem}"
+            description = f"            {TUI.OKPURPLE}-->{TUI.ENDC} Make filesystem : {filesystem}"
             match filesystem:
                 case "uefi":
                     self.exec(f"mkfs.fat -F32 {drive['blk']}{number}")
@@ -121,7 +121,7 @@ class ArchInstaller:
                     command = f"echo 'y\n' | mkfs.ext4 -L {label} {drive['blk']}{number}"
                 case "swap":
                     command = f"mkswap {drive['blk']}{number}"
-            self.exec(command,discription)
+            self.exec(command,description)
 
     def mount(self):
 
@@ -132,9 +132,9 @@ class ArchInstaller:
         # root -> /mnt
         while not os.path.exists("/dev/disk/by-label/ROOT"):
             time.sleep(1)
-        discription = f"    {TUI.OKBLUE}-->{TUI.ENDC} ROOT"
+        description = f"    {TUI.OKBLUE}-->{TUI.ENDC} ROOT"
         command = f"mount /dev/disk/by-label/ROOT /mnt"
-        self.exec(command,discription)
+        self.exec(command,description)
 
         self.exec("mkdir -p /mnt/{home,boot/efi}")
 
@@ -142,35 +142,35 @@ class ArchInstaller:
             
             # boot -> /mnt/boot/efi
             if partition["label"] == "BOOT":
-                discription = f"    {TUI.OKBLUE}-->{TUI.ENDC} BOOT"
+                description = f"    {TUI.OKBLUE}-->{TUI.ENDC} BOOT"
                 command = f"mount {drive['blk']}{partition['number']} /mnt/boot/efi"
-                self.exec(command,discription)    
+                self.exec(command,description)    
             
             # Mount Home Partition if exist
             # home -> /mnt/home
             if partition["label"] == "HOME":
-                discription = f"    {TUI.OKBLUE}-->{TUI.ENDC} HOME"
+                description = f"    {TUI.OKBLUE}-->{TUI.ENDC} HOME"
                 command = f"mount {drive['blk']}{partition['number']} /mnt/home"
-                self.exec(command,discription)
+                self.exec(command,description)
 
             # enable swap if exists
             if partition["label"] == "SWAP":
-                discription = f"    {TUI.OKBLUE}-->{TUI.ENDC} Enable SWAP Partition "
+                description = f"    {TUI.OKBLUE}-->{TUI.ENDC} Enable SWAP Partition "
                 command = f"swapon {drive['blk']}{partition['number']}"
-                self.exec(command,discription)
+                self.exec(command,description)
 
     def installPackages(self) -> None:
         print(f"{TUI.OKGREEN}==>{TUI.ENDC} Install Packages")
         if os.environ.get('USER') == "root":
             for package in self.config["packages"]:
-                discription = f"    {TUI.OKBLUE}-->{TUI.ENDC} {package}"
+                description = f"    {TUI.OKBLUE}-->{TUI.ENDC} {package}"
                 command = f"pacstrap /mnt {package}"
-                self.exec(command,discription)
+                self.exec(command,description)
         else:
             for package in self.config["packages"]:
-                discription = f"    {TUI.OKBLUE}-->{TUI.ENDC} {package}"
+                description = f"    {TUI.OKBLUE}-->{TUI.ENDC} {package}"
                 command = f"{self.config['aurhelper']} -S --skipreview --noconfirm {package}"
-                self.exec(command,discription)
+                self.exec(command,description)
 
     def genFstab(self) -> None:
         print(f"{TUI.OKGREEN}==>{TUI.ENDC} Generating FSTAB {TUI.OKGREEN}✔{TUI.ENDC}")
@@ -189,15 +189,15 @@ class ArchInstaller:
             f.write(f"LANG={self.config['settings']['lang']}\n")
 
     def setTimeZone(self) -> None:
-        discription = f"{TUI.OKGREEN}==>{TUI.ENDC} setting TimeZone to {self.config['settings']['timezone']}"
+        description = f"{TUI.OKGREEN}==>{TUI.ENDC} setting TimeZone to {self.config['settings']['timezone']}"
         command = f"ln -fs /usr/share/zoneinfo/{self.config['settings']['timezone']} /etc/localtime"
-        self.exec(command, discription, True)
+        self.exec(command, description, True)
         self.exec("hwclock --systohc --utc", chroot=True)
 
     def installBootLoader(self):
-        discription = f"{TUI.OKGREEN}==>{TUI.ENDC} Generating BootLoader"
+        description = f"{TUI.OKGREEN}==>{TUI.ENDC} Generating BootLoader"
         command = f"grub-install --recheck"
-        self.exec(command,discription,True)
+        self.exec(command,description,True)
         self.exec(f"grub-mkconfig -o /boot/grub/grub.cfg", chroot=True)
 
     def setHostName(self) -> None:
@@ -215,35 +215,35 @@ class ArchInstaller:
     def enableServices(self):
         print(f"{TUI.OKGREEN}==>{TUI.ENDC} Enabling Services")
         for service in self.config["services"]:
-            discription = f"    {TUI.OKBLUE}-->{TUI.ENDC} {service}"
+            description = f"    {TUI.OKBLUE}-->{TUI.ENDC} {service}"
             if os.environ.get('USER') == "root":
                 command = f"systemctl enable {service}"
                 chroot = True
             else:
                 command = f"sudo systemctl enable {service}"
                 chroot = False
-            self.exec(command,discription,chroot)
+            self.exec(command,description,chroot)
 
     def setRootPassword(self):
         password = self.config["account"]["rootpassword"]
-        discription = f"{TUI.OKGREEN}==>{TUI.ENDC} Set Root Password"
-        self.exec(f"echo 'root:{password}' | chpasswd", discription, True)
+        description = f"{TUI.OKGREEN}==>{TUI.ENDC} Set Root Password"
+        self.exec(f"echo 'root:{password}' | chpasswd", description, True)
 
     def createUser(self):
         username = self.config["account"]["username"]
         password = self.config["account"]["password"]
         shell = self.config["settings"]["shell"]
-        discription = f"{TUI.OKGREEN}==>{TUI.ENDC} Creating User ({username})"
+        description = f"{TUI.OKGREEN}==>{TUI.ENDC} Creating User ({username})"
         command = f"useradd -m -g users -G wheel -s {shell} {username}"
-        self.exec(command, discription, True)
+        self.exec(command, description, True)
         self.exec(f"echo '{username}:{password}' | chpasswd", chroot=True)
 
     def sudoersConf(self, conf):
         if conf == "UA":
             self.exec("chmod 644 /etc/sudoers", chroot=True)
-            discription = f"{TUI.OKGREEN}==>{TUI.ENDC} Config sudoers file"
+            description = f"{TUI.OKGREEN}==>{TUI.ENDC} Config sudoers file"
             command = r"sed -i 's/^#\s*\(%wheel\s*ALL=(ALL:ALL)\s*ALL\)/\1/' /mnt/etc/sudoers"
-            self.exec(command,discription)
+            self.exec(command,description)
         elif conf == "UN":
             self.exec(r"sudo sed -i 's/^#\s*\(%wheel\s*ALL=(ALL:ALL)\s*NOPASSWD:\s*ALL\)/\1/' /etc/sudoers")
         elif conf == "CN":
@@ -261,9 +261,9 @@ class ArchInstaller:
         self.exec(command, description)
 
     def umount(self):
-        discription = f"{TUI.OKGREEN}==>{TUI.ENDC} Umount Partitions {TUI.OKGREEN}✔{TUI.ENDC}"
+        description = f"{TUI.OKGREEN}==>{TUI.ENDC} Umount Partitions {TUI.OKGREEN}✔{TUI.ENDC}"
         command = "umount -R /mnt"
-        self.exec(command, discription)
+        self.exec(command, description)
 
     def reboot(self):
         print("====================================\nInstallation completed!!")
@@ -272,23 +272,23 @@ class ArchInstaller:
 
     def installAURHelper(self):
         self.exec(f"cd /tmp && git clone http://aur.archlinux.org/{self.config['aurhelper']}-bin.git")
-        discription = f"{TUI.OKGREEN}==>{TUI.ENDC} Install AUR helper"
+        description = f"{TUI.OKGREEN}==>{TUI.ENDC} Install AUR helper"
         command = f"cd /tmp/{self.config['aurhelper']}-bin && makepkg -si --noconfirm"
-        self.exec(command,discription)
+        self.exec(command,description)
 
     def runUserScripts(self):
         print(f"{TUI.OKGREEN}==>{TUI.ENDC} Execute Your Scripts")
         for script in self.config["scripts"]:
-            discription = f"    {TUI.OKBLUE}-->{TUI.ENDC} {script['name']}"
+            description = f"    {TUI.OKBLUE}-->{TUI.ENDC} {script['name']}"
             if 'shell' in script:
                 command = script['shell']
             elif 'script' in script:
                 self.exec(f"chmod +x {script['script']}")
                 command = script["script"]
             else:
-                discription += " : Yaml file is incorret"
+                description += " : Yaml file is incorret"
                 command = "fakesudo :)"
-            self.exec(command, discription)
+            self.exec(command, description)
 
     def run(self):
         self.ascii()
