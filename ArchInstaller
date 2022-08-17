@@ -49,7 +49,7 @@ class ArchInstaller:
             print(f"{TUI.OKGREEN}==>{TUI.ENDC} There is a problem with the config.yaml")
             exit()
         try:
-            requests.get("https://github.com/")
+            requests.get("https://google.com/")
         except:
             print(f"{TUI.OKGREEN}==>{TUI.ENDC} Your connection is not stable")
             exit()
@@ -261,7 +261,7 @@ class ArchInstaller:
         self.exec(command, description)
 
     def umount(self):
-        description = f"{TUI.OKGREEN}==>{TUI.ENDC} Umount Partitions {TUI.OKGREEN}✔{TUI.ENDC}"
+        description = f"{TUI.OKGREEN}==>{TUI.ENDC} Umount Partitions"
         command = "umount -R /mnt"
         self.exec(command, description)
 
