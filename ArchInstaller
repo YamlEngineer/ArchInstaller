@@ -34,16 +34,25 @@ class TUI:
 
 class ArchInstaller:
     def __init__(self) -> None:
-        if len(sys.argv) != 1:
-            with open("./config.yaml", mode="w") as f:
-                response = requests.get(sys.argv[1])
-                f.write(response.text)
-        with open("./config.yaml") as data:
-            config = yaml.load(data, Loader=yaml.FullLoader)
-            if os.environ.get("USER") == "root":
-                self.config = config["root"]
-            else:
-                self.config = config["user"]
+        try:
+            if len(sys.argv) != 1:
+                with open("./config.yaml", mode="w") as f:
+                    response = requests.get(sys.argv[1])
+                    f.write(response.text)
+            with open("./config.yaml") as data:
+                config = yaml.load(data, Loader=yaml.FullLoader)
+                if os.environ.get("USER") == "root":
+                    self.config = config["root"]
+                else:
+                    self.config = config["user"]
+        except:
+            print(f"{TUI.OKGREEN}==>{TUI.ENDC} There is a problem with the config.yaml")
+            exit()
+        try:
+            requests.get("https://github.com/")
+        except:
+            print(f"{TUI.OKGREEN}==>{TUI.ENDC} Your connection is not stable")
+            exit()
 
     def ascii(self) -> None:
         ASCII = """    ___    ____  ________  _______   ________________    __    __    __________ 
@@ -71,7 +80,7 @@ class ArchInstaller:
                     print(discription + f' {TUI.OKGREEN}✔{TUI.ENDC}' + "                            ", end='\n')
                 else:
                     print(discription + f' {TUI.FAIL}✘{TUI.ENDC}' + "                               ", end='\n')
-
+    
     def setNtp(self) -> None:
         discription = f"{TUI.OKGREEN}==>{TUI.ENDC} set ntp to {self.config['settings']['ntp']}"
         command = f"timedatectl set-ntp {self.config['settings']['ntp']}"
