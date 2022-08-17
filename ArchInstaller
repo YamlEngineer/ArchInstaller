@@ -227,7 +227,7 @@ class ArchInstaller:
     def setRootPassword(self):
         password = self.config["account"]["rootpassword"]
         discription = f"{TUI.OKGREEN}==>{TUI.ENDC} Set Root Password"
-        self.exec(f"echo -e '{password}\n{password}' | passwd root", discription, True)
+        self.exec(f"echo 'root:{password}' | chpasswd", discription, True)
 
     def createUser(self):
         username = self.config["account"]["username"]
@@ -236,7 +236,7 @@ class ArchInstaller:
         discription = f"{TUI.OKGREEN}==>{TUI.ENDC} Creating User ({username})"
         command = f"useradd -m -g users -G wheel -s {shell} {username}"
         self.exec(command, discription, True)
-        self.exec(f"echo -e '{password}\n{password}' | passwd {username}", chroot=True)
+        self.exec(f"echo '{username}:{password}' | chpasswd", chroot=True)
 
     def sudoersConf(self, conf):
         if conf == "UA":
