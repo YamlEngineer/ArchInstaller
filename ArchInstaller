@@ -225,18 +225,17 @@ class ArchInstaller:
             self.exec(command,description,chroot)
 
     def setRootPassword(self):
-        password = self.config["account"]["rootpassword"]
         description = f"{TUI.OKGREEN}==>{TUI.ENDC} Set Root Password"
-        self.exec(f"echo 'root:{password}' | chpasswd", description, True)
+        command = f"echo -n 'root:password' | chpasswd"
+        self.exec(command, description, True)
 
     def createUser(self):
-        username = self.config["account"]["username"]
-        password = self.config["account"]["password"]
+        username = self.config["username"]
         shell = self.config["settings"]["shell"]
         description = f"{TUI.OKGREEN}==>{TUI.ENDC} Creating User ({username})"
         command = f"useradd -m -g users -G wheel -s {shell} {username}"
         self.exec(command, description, True)
-        self.exec(f"echo '{username}:{password}' | chpasswd", chroot=True)
+        self.exec(f"echo '{username}:password' | chpasswd", chroot=True)
 
     def sudoersConf(self, conf):
         if conf == "UA":
@@ -250,9 +249,9 @@ class ArchInstaller:
             self.exec(r"sudo sed -i 's/^\s*\(%wheel\s*ALL=(ALL:ALL)\s*NOPASSWD:\s*ALL\)/# \1/' /etc/sudoers")
 
     def copyInstaller(self):
-        self.exec(f"mkdir -p /mnt/home/{self.config['account']['username']}/archinstaller")
-        self.exec(f"cp -r . /mnt/home/{self.config['account']['username']}/archinstaller")
-        self.exec(f"chown -R {self.config['account']['username']}:wheel /mnt/home/{self.config['account']['username']}/archinstaller", chroot=True)
+        self.exec(f"mkdir -p /mnt/home/{self.config['username']}/archinstaller")
+        self.exec(f"cp -r . /mnt/home/{self.config['username']}/archinstaller")
+        self.exec(f"chown -R {self.config['username']}:wheel /mnt/home/{self.config['username']}/archinstaller", chroot=True)
     
     def installDependencies(self):
         description = f"{TUI.OKGREEN}==>{TUI.ENDC} Install dependencies"

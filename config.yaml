@@ -1,8 +1,5 @@
 root:
-  account:
-    rootpassword: password
-    username: fakesudo
-    password: password
+  username: fakesudo
   settings:
     ntp: True
     hostname: archlinux
