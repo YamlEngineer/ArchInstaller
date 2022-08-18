@@ -257,7 +257,7 @@ class ArchInstaller:
     def installDependencies(self):
         description = f"{TUI.OKGREEN}==>{TUI.ENDC} Install dependencies"
         depends = ['git', 'python-yaml', 'python-requests']
-        command = "pacstrap /mnt " + depends.join(' ')
+        command = "pacstrap /mnt " + " ".join(depends)
         self.exec(command, description)
 
     def umount(self):
