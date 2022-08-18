@@ -1,4 +1,5 @@
 <!-- DevOps.nvim -->
+
 # Arch Linux Installer
 
 [![Contributors][contributors-shield]][contributors-url]
@@ -9,6 +10,7 @@
 [![Telegram][telegram-shield]][telegram-url]
 
 <!-- GETTING STARTED -->
+
 ## Introduction
 
 Install archlinux and config based on a yaml configuration
@@ -17,8 +19,7 @@ Install archlinux and config based on a yaml configuration
 
 ### Prerequrments
 
-* Just Learning yaml :)
-
+- Just Learning yaml :)
 
 ### Installation
 
@@ -39,84 +40,81 @@ Config will separate into user settings that run after Installation and root set
 
 ### Root settings:
 
-* account
-    
-    Involves username and password, rootpassword
+- username
+  Note : defualt password is 'password' and you can change it after reboot
 
-* hostname
+- hostname
 
-* locale
-    
-    common: `en_US.UTF-8 UTF-8`
+- locale
 
-* timezone
-    
-    Find your timezone with `timedatectl list-timezones`
+  common: `en_US.UTF-8 UTF-8`
 
-* shell
-    
-    Default user shell
+- timezone
 
-    common: `/bin/bash`
+  Find your timezone with `timedatectl list-timezones`
 
-* drive
-    * blk
-        
-        The hard drive you want to install arch on it
+- shell
 
-        example: `/dev/sda`
+  Default user shell
 
-    * erase
-        
-        Format the hard drive don't enable this field unless you know what are you doing
-        
-        example: Boolean value
+  common: `/bin/bash`
 
-    * partitions
-    
-        List of partition to create
-        Contains: 
+- drive
 
-        * size
-            
-            in `K/M/G` format
-                
-        * filesystem
-                
-            type of the partition
+  - blk
 
-            commons: `uefi/linux/swap & all fdisk types`
+    The hard drive you want to install arch on it
 
-        * number
+    example: `/dev/sda`
 
-            the number of the primary partition
+  - erase
 
-    for more information read `fdisk` manual
+    Format the hard drive don't enable this field unless you know what are you doing
 
-* base packages
+    example: Boolean value
 
-    Packages needed for booting the system
+  - partitions
 
-* base daemons
+    List of partition to create
+    Contains:
+
+    - size
+      in `K/M/G` format
+    - filesystem
+
+      type of the partition
+
+      commons: `uefi/linux/swap & all fdisk types`
+
+    - number
+
+      the number of the primary partition
+
+  for more information read `fdisk` manual
+
+- base packages
+
+  Packages needed for booting the system
+
+- base daemons
 
 ### User settings contains:
 
-* custom script
+- custom script
 
-* aurhelper
+- aurhelper
 
-    common: `yay/paru`
+  common: `yay/paru`
 
-* user packages
+- user packages
 
-* user daemon
-
-
+- user daemon
 
 Note: if you configured user setting you should rerun installer command after reboot
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+
 [contributors-shield]: https://img.shields.io/github/contributors/FakeSudo/ArchInstaller?style=for-the-badge
 [contributors-url]: https://github.com/FakeSudo/ArchInstaller/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/FakeSudo/ArchInstaller?style=for-the-badge
@@ -129,4 +127,3 @@ Note: if you configured user setting you should rerun installer command after re
 [license-url]: https://github.com/FakeSudo/ArchInstaller/blob/main/LICENSE.md
 [telegram-shield]: https://img.shields.io/badge/Telegram-blue.svg?style=for-the-badge&logo=telegram
 [telegram-url]: https://t.me/FakeSudo
-
