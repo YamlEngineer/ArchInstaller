@@ -41,7 +41,8 @@ Config will separate into user settings that run after Installation and root set
 ### Root settings:
 
 - username
-  Note : defualt password is 'password' and you can change it after reboot
+
+- Note : defualt password is 'password' and you can change it after reboot
 
 - hostname
 
